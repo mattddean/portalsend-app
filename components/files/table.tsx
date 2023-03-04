@@ -135,7 +135,7 @@ export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClick
 
   const pagination = useMemo(() => ({ pageIndex, pageSize }), [pageIndex, pageSize]);
 
-  const totalCount = dataQuery.data?.pages[pagination.pageIndex]?.totalCount ?? 0;
+  const totalCount = (dataQuery.data?.pages[pagination.pageIndex]?.totalCount as number) ?? 0;
   const pageCount = useMemo(() => {
     return Math.ceil(totalCount / pageSize);
   }, [totalCount, pageSize]);

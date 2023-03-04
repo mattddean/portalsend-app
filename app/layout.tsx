@@ -36,7 +36,7 @@ export default function RootLayout(props: PropsWithChildren) {
           <Script
             async
             defer
-            data-website-id="1df99f73-cd91-4979-adc9-03a4b2f117f3"
+            data-website-id="fc659f2e-2a70-462f-9e40-ddde89a878c6"
             src="https://umami-mattddean.vercel.app/umami.js"
           />
         </head>
