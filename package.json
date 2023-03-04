@@ -9,6 +9,7 @@
     "build": "run-s build:*",
     "start": "next start",
     "lint": "next lint",
+    "db:push-reset": "pnpm with-env prisma db push --skip-generate --force-reset --accept-data-loss",
     "db:seed": "pnpm with-env prisma db seed",
     "dev-migrate": "prisma migrate dev",
     "postinstall": "prisma generate",
