@@ -25,21 +25,14 @@ export async function getUser(): Promise<User | null> {
     }, {} as Record<string, string>);
 
   const sessionToken = newCookies["next-auth.session-token"];
-  if (!sessionToken) {
-    console.debug("missing session token");
-    return null;
-  }
+  if (!sessionToken) return null;
 
   const session = await db
-    .selectFrom("sessions")
-    .innerJoin("users", "users.id", "sessions.userId")
-    .select(["users.email as user_email", "users.name as user_name", "users.id as user_id"])
+    .selectFrom("Session")
+    .innerJoin("User", "User.id", "Session.userId")
+    .select(["User.email as user_email", "User.name as user_name", "User.id as user_id"])
     .executeTakeFirst();
-
-  if (!session) {
-    console.debug("no active session");
-    return null;
-  }
+  if (!session) return null;
 
   return {
     id: session.user_id,

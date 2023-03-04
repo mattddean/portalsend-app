@@ -54,7 +54,7 @@ export const exampleRouter = router({
       }
 
       await db
-        .updateTable("users")
+        .updateTable("User")
         .where("email", "=", authenticatedEmail)
         .set({
           public_key: input.publicKey,
@@ -72,9 +72,9 @@ export const exampleRouter = router({
     }
 
     const user = await db
-      .selectFrom("users")
+      .selectFrom("User")
       .select(["encrypted_private_key", "encrypted_private_key_iv", "encrypted_private_key_salt", "public_key"])
-      .where("users.email", "=", authenticatedEmail)
+      .where("User.email", "=", authenticatedEmail)
       .executeTakeFirst();
 
     if (!user?.encrypted_private_key || !user?.encrypted_private_key_iv || !user?.encrypted_private_key_salt) {
@@ -96,7 +96,7 @@ export const exampleRouter = router({
     .input(z.object({ user_emails: z.array(z.string()) }))
     .mutation(async ({ input }) => {
       const users = await db
-        .selectFrom("users")
+        .selectFrom("User")
         .select(["email", "public_key"])
         .where("email", "in", input.user_emails)
         .execute();
@@ -131,37 +131,37 @@ export const exampleRouter = router({
       const userEmail = ctx.user.email;
       if (!userEmail) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
 
-      const sharedKeySet = await db
-        .insertInto("shared_key_sets")
-        .values({ created_at: new Date(), updated_at: new Date(), id: createId() })
-        .returning(["id"])
+      const sharedKeySetId = createId();
+      await db
+        .insertInto("SharedKeySet")
+        .values({ created_at: new Date(), updated_at: new Date(), id: sharedKeySetId })
         .executeTakeFirstOrThrow();
 
       for (const encryptedSharedKey of input.encrypted_keys_for_recipients) {
         const user = await db
-          .selectFrom("users")
+          .selectFrom("User")
           .select(["id"])
           .where("email", "=", encryptedSharedKey.email)
           .executeTakeFirstOrThrow();
-        const sharedKey = await db
-          .insertInto("shared_keys")
+        const sharedKeyId = createId();
+        await db
+          .insertInto("SharedKey")
           .values([
             {
               encrypted_key: encryptedSharedKey.encrypted_shared_key,
-              shared_key_set_id: sharedKeySet.id,
-              id: createId(),
+              shared_key_set_id: sharedKeySetId,
+              id: sharedKeyId,
               created_at: new Date(),
               updated_at: new Date(),
             },
           ])
-          .returning(["id"])
           .executeTakeFirstOrThrow();
         await db
-          .insertInto("file_accesses")
+          .insertInto("FileAccess")
           .values([
             {
               user_id: user.id,
-              shared_key_id: sharedKey.id,
+              shared_key_id: sharedKeyId,
               original_sender: false,
               permission: "VIEWER",
               id: createId(),
@@ -172,26 +172,26 @@ export const exampleRouter = router({
           .executeTakeFirstOrThrow();
       }
 
-      const sharedKey = await db
-        .insertInto("shared_keys")
+      const sharedKeyId = createId();
+      await db
+        .insertInto("SharedKey")
         .values([
           {
             encrypted_key: input.encrypted_key_for_self,
-            shared_key_set_id: sharedKeySet.id,
-            id: createId(),
+            shared_key_set_id: sharedKeySetId,
+            id: sharedKeyId,
             created_at: new Date(),
             updated_at: new Date(),
           },
         ])
-        .returning(["id"])
         .executeTakeFirstOrThrow();
 
       await db
-        .insertInto("file_accesses")
+        .insertInto("FileAccess")
         .values([
           {
             user_id: ctx.user.id,
-            shared_key_id: sharedKey.id,
+            shared_key_id: sharedKeyId,
             original_sender: true,
             permission: "OWNER",
             id: createId(),
@@ -201,21 +201,26 @@ export const exampleRouter = router({
         ])
         .executeTakeFirstOrThrow();
 
-      const file = await db
-        .insertInto("files")
+      const fileId = createId();
+      await db
+        .insertInto("File")
         .values([
           {
             iv: input.file_iv,
             encrypted_name: input.encrypted_filename,
-            shared_key_set_id: sharedKeySet.id,
+            shared_key_set_id: sharedKeySetId,
             created_at: new Date(),
             updated_at: new Date(),
-            id: createId(),
+            id: fileId,
             slug: createId(),
             storage_key: createId(),
           },
         ])
-        .returning(["id", "storage_key", "slug"])
+        .executeTakeFirstOrThrow();
+      const file = await db
+        .selectFrom("File")
+        .select(["id", "storage_key", "slug"])
+        .where("id", "=", fileId)
         .executeTakeFirstOrThrow();
 
       // Add a one megabyte buffer in case the encrypted version of the file is a bit longer than the unencrypted version.
@@ -242,13 +247,13 @@ export const exampleRouter = router({
 
   getFile: privateProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
     const file = await db
-      .selectFrom("file_accesses")
-      .where("file_accesses.user_id", "=", ctx.user.id)
-      .innerJoin("shared_keys", "shared_keys.id", "file_accesses.shared_key_id")
-      .innerJoin("shared_key_sets", "shared_key_sets.id", "shared_keys.shared_key_set_id")
-      .innerJoin("files", "files.shared_key_set_id", "shared_key_sets.id")
-      .where("files.slug", "=", input.slug)
-      .select(["shared_keys.encrypted_key", "files.iv", "files.name"])
+      .selectFrom("FileAccess")
+      .where("FileAccess.user_id", "=", ctx.user.id)
+      .innerJoin("SharedKey", "SharedKey.id", "FileAccess.shared_key_id")
+      .innerJoin("SharedKeySet", "SharedKeySet.id", "SharedKey.shared_key_set_id")
+      .innerJoin("File", "File.shared_key_set_id", "SharedKeySet.id")
+      .where("File.slug", "=", input.slug)
+      .select(["SharedKey.encrypted_key", "File.iv", "File.name"])
       .executeTakeFirst();
 
     // NOT_FOUND is fine if the file exists but the user doesn't have access to it. This prevents revealing that the file exists.
@@ -264,7 +269,7 @@ export const exampleRouter = router({
 
   createFileSignedDownloadUrl: privateProcedure.input(z.object({ slug: z.string() })).mutation(async ({ input }) => {
     const file = await db
-      .selectFrom("files")
+      .selectFrom("File")
       .select(["storage_key", "name"])
       .where("slug", "=", input.slug)
       .executeTakeFirst();
@@ -317,36 +322,35 @@ export const exampleRouter = router({
 
       // TODO: transaction
       let totalCountQuery = db
-        .selectFrom("file_accesses")
-        .where("file_accesses.user_id", "=", ctx.user.id)
-        .innerJoin("shared_keys", "shared_keys.id", "file_accesses.shared_key_id")
-        .innerJoin("shared_key_sets", "shared_key_sets.id", "shared_keys.shared_key_set_id")
-        .innerJoin("files", "files.shared_key_set_id", "shared_key_sets.id")
-        .select([db.fn.count("file_accesses.id").as("file_count")]);
+        .selectFrom("FileAccess")
+        .where("FileAccess.user_id", "=", ctx.user.id)
+        .innerJoin("SharedKey", "SharedKey.id", "FileAccess.shared_key_id")
+        .innerJoin("SharedKeySet", "SharedKeySet.id", "SharedKey.shared_key_set_id")
+        .innerJoin("File", "File.shared_key_set_id", "SharedKeySet.id")
+        .select([db.fn.count("FileAccess.id").as("file_count")]);
 
       if (input.only_sent_received === "sent") {
-        console.debug("filtering to original sender true");
-        totalCountQuery = totalCountQuery.where("file_accesses.original_sender", "=", true);
+        totalCountQuery = totalCountQuery.where("FileAccess.original_sender", "=", true);
       } else if (input.only_sent_received === "received") {
-        totalCountQuery = totalCountQuery.where("file_accesses.original_sender", "=", false);
+        totalCountQuery = totalCountQuery.where("FileAccess.original_sender", "=", false);
       }
 
       const totalCountResult = await totalCountQuery.execute();
       const totalCount = totalCountResult[0].file_count;
 
       let itemsQuery = db
-        .selectFrom("file_accesses")
-        .where("file_accesses.user_id", "=", ctx.user.id)
-        .innerJoin("shared_keys", "shared_keys.id", "file_accesses.shared_key_id")
-        .innerJoin("shared_key_sets", "shared_key_sets.id", "shared_keys.shared_key_set_id")
-        .innerJoin("files", "files.shared_key_set_id", "shared_key_sets.id")
-        .orderBy("files.created_at", "desc")
-        .select(["files.created_at", "encrypted_key", "encrypted_name", "iv", "files.slug"])
+        .selectFrom("FileAccess")
+        .where("FileAccess.user_id", "=", ctx.user.id)
+        .innerJoin("SharedKey", "SharedKey.id", "FileAccess.shared_key_id")
+        .innerJoin("SharedKeySet", "SharedKeySet.id", "SharedKey.shared_key_set_id")
+        .innerJoin("File", "File.shared_key_set_id", "SharedKeySet.id")
+        .orderBy("File.created_at", "desc")
+        .select(["File.created_at", "encrypted_key", "encrypted_name", "iv", "File.slug"])
         .limit(input.limit);
 
       const cursor = input.cursor;
       if (cursor) {
-        itemsQuery = itemsQuery.where("files.created_at", "<=", cursor);
+        itemsQuery = itemsQuery.where("File.created_at", "<=", cursor);
       }
 
       const items = await itemsQuery.execute();
