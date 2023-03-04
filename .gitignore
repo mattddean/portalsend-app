@@ -38,3 +38,4 @@ next-env.d.ts
 .env
 
 /prisma/seed.ts
+/prisma/dumps
