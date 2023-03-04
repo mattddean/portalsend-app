@@ -11,7 +11,7 @@ import { z } from "zod";
 import { db } from "../../prisma/kysely";
 import { privateProcedure, publicProcedure, router } from "../trpc";
 
-const portalsendFilesS3Bucket = "portalsend-files";
+const portalsendFilesS3Bucket = "portalsend-app-files";
 
 // TODO: use env object from env.mjs to get environment variables
 
@@ -94,7 +94,7 @@ export const exampleRouter = router({
 
   getPublicKeysForUsers: privateProcedure
     .input(z.object({ user_emails: z.array(z.string()) }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const users = await db
         .selectFrom("users")
         .select(["email", "public_key"])
