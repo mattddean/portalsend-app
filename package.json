@@ -4,11 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build:postgres": "prisma migrate deploy",
-    "build:next": "next build",
-    "build": "run-s build:*",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "db:push": "pnpm with-env prisma db push",
     "db:push-reset": "pnpm with-env prisma db push --skip-generate --force-reset --accept-data-loss",
     "db:seed": "pnpm with-env prisma db seed",
     "dev-migrate": "prisma migrate dev",
@@ -16,9 +15,15 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.259.0",
-    "@aws-sdk/s3-presigned-post": "^3.276.0",
-    "@aws-sdk/s3-request-presigner": "^3.259.0",
+    "@aws-sdk/client-s3": "^3.282.0",
+    "@aws-sdk/middleware-endpoint": "^3.282.0",
+    "@aws-sdk/s3-presigned-post": "^3.284.0",
+    "@aws-sdk/s3-request-presigner": "^3.282.0",
+    "@aws-sdk/signature-v4": "^3.282.0",
+    "@aws-sdk/types": "^3.272.0",
+    "@aws-sdk/util-format-url": "^3.272.0",
+    "@aws-sdk/util-hex-encoding": "^3.201.0",
+    "@aws-sdk/util-utf8": "^3.254.0",
     "@formkit/auto-animate": "1.0.0-beta.6",
     "@heroicons/react": "^2.0.12",
     "@next-auth/prisma-adapter": "^1.0.5",
@@ -41,19 +46,20 @@
     "@tanstack/query-core": "^4.14.5",
     "@tanstack/react-query": "^4.14.5",
     "@tanstack/react-table": "^8.7.9",
-    "@trpc/client": "^10.0.0-rc.1",
-    "@trpc/next": "^10.8.1",
-    "@trpc/react-query": "^10.0.0-rc.1",
-    "@trpc/server": "^10.0.0-rc.1",
+    "@trpc/client": "^10.14.1",
+    "@trpc/react-query": "^10.14.1",
+    "@trpc/server": "^10.14.1",
+    "buffer": "^6.0.3",
     "class-variance-authority": "^0.4.0",
     "clsx": "^1.2.1",
+    "crypto": "^1.0.1",
     "date-fns": "^2.29.3",
     "http-status": "^1.6.2",
-    "kysely": "^0.23.4",
+    "kysely": "0.21.6",
     "kysely-planetscale": "^1.3.0",
     "lucide-react": "^0.109.0",
-    "next": "^13.2.2",
-    "next-auth": "4.14.0",
+    "next": "^13.2.3",
+    "next-auth": "^4.20.1",
     "next-themes": "^0.2.1",
     "npm-run-all": "^4.1.5",
     "prisma": "^4.8.0",
@@ -89,5 +95,10 @@
   },
   "prisma": {
     "seed": "pnpm dlx tsx prisma/seed.ts"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@tanstack/react-query@4.26.1": "patches/@tanstack__react-query@4.26.1.patch"
+    }
   }
 }

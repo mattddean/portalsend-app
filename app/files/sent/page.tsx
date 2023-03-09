@@ -11,6 +11,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { decryptRsaPrivateKey, stringToUint8Array } from "~/lib/key-utils";
 
+export const runtime = "experimental-edge";
+
 const Page: FC = () => {
   const user = api.auth.getSession.useQuery();
   const [dialogOpen, setDialogOpen] = useState(false);

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { forwardRef } from "react";
 import {
@@ -9,6 +11,7 @@ import {
   NavigationMenuTrigger,
 } from "~/components/ui/navigation-menu";
 import { siteConfig } from "~/config/site";
+import { api } from "../client/trpcClient";
 import { LogoIcon } from "./icons";
 import { cn } from "./ui/lib/utils";
 
@@ -37,7 +40,9 @@ export interface Props {
   signedIn: boolean;
 }
 
-export function MainNav({ signedIn }: Props) {
+export function MainNav() {
+  const userQuery = api.auth.getSession.useQuery();
+
   return (
     <div className="hidden md:flex">
       <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -46,7 +51,7 @@ export function MainNav({ signedIn }: Props) {
       </Link>
       <NavigationMenu>
         <NavigationMenuList>
-          {signedIn && (
+          {!!userQuery.data?.user && (
             <NavigationMenuItem>
               <NavigationMenuTrigger className="h-9">Files</NavigationMenuTrigger>
               <NavigationMenuContent>

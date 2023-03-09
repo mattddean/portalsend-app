@@ -16,26 +16,27 @@ datasource db {
 // uncomment the @db.Text annotations below
 // @see https://next-auth.js.org/schemas/models
 model Account {
-  id                String   @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?  @db.Text
-  access_token      String?  @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?  @db.Text
-  session_state     String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  oauth_token_secret String?  @db.Text
+  oauth_token        String?  @db.Text
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
-  @@map("accounts")
 }
 
 model Session {
@@ -49,7 +50,6 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@map("sessions")
 }
 
 model User {
@@ -60,9 +60,9 @@ model User {
   image                      String?
   // RSA private key exported as JWK, encrypted with AES, then base64 encoded
   encrypted_private_key      String?   @db.Text
-  // Initialization vector used to encrypt encryptedPrivateKey with AES, base64 encoded
+  // Initialization vector used to encrypt encrypted_private_key with AES, base64 encoded
   encrypted_private_key_iv   String?   @db.Text
-  // Salt used to encrypt encryptedPrivateKey with AES, base64 encoded
+  // Salt used to encrypt encrypted_private_key with AES, base64 encoded
   encrypted_private_key_salt String?   @db.Text
   // RSA public key exported as JWK then base64 encoded
   public_key                 String?   @db.Text
@@ -72,8 +72,6 @@ model User {
   accounts      Account[]
   sessions      Session[]
   file_accesses FileAccess[]
-
-  @@map("users")
 }
 
 model VerificationToken {
@@ -84,7 +82,6 @@ model VerificationToken {
   updated_at DateTime @updatedAt
 
   @@unique([identifier, token])
-  @@map("verification_tokens")
 }
 
 // Stores the permission that a user has to a file along with the shared key that the user can use
@@ -103,7 +100,6 @@ model FileAccess {
 
   @@index([user_id])
   @@index([shared_key_id])
-  @@map("file_accesses")
 }
 
 // One key in a shared key set.
@@ -119,7 +115,6 @@ model SharedKey {
   file_accesses  FileAccess[]
 
   @@index([shared_key_set_id])
-  @@map("shared_keys")
 }
 
 // A set of AES keys encrypted for different users which all decrypt to the same key.
@@ -130,8 +125,6 @@ model SharedKeySet {
 
   shared_keys SharedKey[]
   files       File[]
-
-  @@map("shared_key_sets")
 }
 
 model File {
@@ -153,7 +146,6 @@ model File {
   shared_key_set SharedKeySet @relation(fields: [shared_key_set_id], references: [id])
 
   @@index([shared_key_set_id])
-  @@map("files")
 }
 
 enum Permission {

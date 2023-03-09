@@ -20,6 +20,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { decryptFile, decryptRsaPrivateKey, stringToUint8Array } from "~/lib/key-utils";
 
+export const runtime = "experimental-edge";
+
 interface Task {
   text: string;
   hoverText: string;

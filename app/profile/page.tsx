@@ -10,6 +10,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { arrayBufferToString, encryptRsaPrivateKey, generateRsaKeyPair, serializeKey } from "~/lib/key-utils";
 
+export const runtime = "experimental-edge";
+
 const Home: NextPage = () => {
   const { data: session } = api.auth.getSession.useQuery();
 

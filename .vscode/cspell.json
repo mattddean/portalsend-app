@@ -4,16 +4,19 @@
   "dictionaryDefinitions": [],
   "dictionaries": [],
   "words": [
+    "codegen",
     "crypographically",
     "encrypter",
     "middlewares",
     "nanoids",
     "nonameopensource",
+    "paralleldrive",
     "runtimes"
   ],
   "ignoreWords": [
-    "Kysely",
-    "Refetched",
+    "authed",
+    "kysely",
+    "refetched",
     "ciphertext",
     "clsx",
     "cooldown",

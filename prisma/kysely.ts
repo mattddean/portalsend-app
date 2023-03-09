@@ -1,18 +1,28 @@
-import type { Account, File, FileAccess, Session, SharedKey, SharedKeySet, User } from "@prisma/client/edge";
-import { Kysely } from "kysely";
+import type {
+  Account,
+  File,
+  FileAccess,
+  Session,
+  SharedKey,
+  SharedKeySet,
+  User,
+  VerificationToken,
+} from "@prisma/client/edge";
 import { PlanetScaleDialect } from "kysely-planetscale";
+import { AuthedKysely, Codegen } from "../next-auth/adapters/kysely";
 
-interface Database {
-  accounts: Account;
-  files: File;
-  file_accesses: FileAccess;
-  sessions: Session;
-  shared_keys: SharedKey;
-  shared_key_sets: SharedKeySet;
-  users: User;
+export interface Database {
+  Account: Account;
+  File: File;
+  FileAccess: FileAccess;
+  Session: Session;
+  SharedKey: SharedKey;
+  SharedKeySet: SharedKeySet;
+  User: User;
+  VerificationToken: VerificationToken;
 }
 
-export const db = new Kysely<Database>({
+export const db = new AuthedKysely<Database, Codegen>({
   dialect: new PlanetScaleDialect({
     url: process.env.DATABASE_URL,
   }),

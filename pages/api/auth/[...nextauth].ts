@@ -1,12 +1,12 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
-import { prisma } from "~/server/prisma";
+import { KyselyAdapter } from "../../../next-auth/adapters/kysely";
+import { db } from "../../../prisma/kysely";
 
 export const nextAuthOptions: NextAuthOptions = {
   // Configure one or more authentication providers
-  adapter: PrismaAdapter(prisma),
+  adapter: KyselyAdapter(db),
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID as string,

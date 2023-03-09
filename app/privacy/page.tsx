@@ -1,5 +1,7 @@
 import { NextPage } from "next";
 
+export const runtime = "experimental-edge";
+
 const Privacy: NextPage = () => {
   return (
     <>
