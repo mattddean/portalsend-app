@@ -31,6 +31,8 @@ import {
   serializeKey,
 } from "~/lib/key-utils";
 
+export const runtime = "experimental-edge";
+
 type PublicKey = {
   email: string;
   data: { public_key: string | null } | undefined;
