@@ -3,15 +3,14 @@ import "./global.css";
 import { Inter as FontSans } from "next/font/google";
 import Link from "next/link";
 import Script from "next/script";
-import { PropsWithChildren, use } from "react";
+import { PropsWithChildren } from "react";
 import { ClientProvider } from "~/client/trpcClient";
 import { LogoIcon } from "~/components/icons";
 import { MainNav } from "~/components/main-nav";
 import { MobileNav } from "~/components/mobile-nav";
 import { ThemeProvider } from "~/components/theme-provider";
 import { cn } from "~/components/ui/lib/utils";
-import { rsc } from "~/server-rsc/trpc";
-import { MainDropdownMenu } from "./main-dropdown-menu";
+import { Avatar } from "./avatar";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -20,13 +19,6 @@ const fontSans = FontSans({
 });
 
 export default function RootLayout(props: PropsWithChildren) {
-  const user = use(rsc.whoami.fetch());
-
-  const avatarFallbackText = (() => {
-    const userName = user?.name;
-    return userName?.[0];
-  })();
-
   return (
     <ClientProvider>
       <html lang="en">
@@ -50,11 +42,11 @@ export default function RootLayout(props: PropsWithChildren) {
             <div className="flex min-h-screen flex-col">
               <header className="sticky top-0 z-40 w-full border-b border-b-slate-200 bg-white dark:border-b-slate-700 dark:bg-slate-900">
                 <div className="container flex h-16 items-center">
-                  <MainNav signedIn={!!user} />
+                  <MainNav />
                   <MobileNav />
                   <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
                     <nav className="flex items-center space-x-2">
-                      {user && <MainDropdownMenu avatarFallbackText={avatarFallbackText} user={user} />}
+                      <Avatar />
                     </nav>
                   </div>
                 </div>

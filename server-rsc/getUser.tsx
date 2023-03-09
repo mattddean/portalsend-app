@@ -1,4 +1,4 @@
-import { AsyncLocalStorage } from "async_hooks";
+import type { AsyncLocalStorage } from "async_hooks";
 import { cookies } from "next/headers";
 import { db } from "../prisma/kysely";
 
