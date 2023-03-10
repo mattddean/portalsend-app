@@ -29,6 +29,7 @@ export default function RootLayout(props: PropsWithChildren) {
             async
             defer
             data-website-id="fc659f2e-2a70-462f-9e40-ddde89a878c6"
+            data-domains="portalsend.app"
             src="https://umami-mattddean.vercel.app/umami.js"
           />
         </head>
