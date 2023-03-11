@@ -235,7 +235,7 @@ const Dropzone: FC<{ onDropFiles: (files: File[]) => unknown; files: File[] }> =
         {/* (fake) animated border https://play.tailwindcss.com/YooA6NXDHi?layout=preview */}
         <div
           className={cn(
-            "animate-border inline-block h-full w-72 cursor-pointer rounded-xl from-teal-500 via-purple-500 to-pink-500 bg-[length:400%_400%] p-0.5 shadow-lg transition focus:outline-none focus:ring",
+            "inline-block h-full w-72 animate-border cursor-pointer rounded-xl from-teal-500 via-purple-500 to-pink-500 bg-[length:400%_400%] p-0.5 shadow-lg transition focus:outline-none focus:ring",
             !file ? "h-36 bg-gradient-to-r" : "h-24 bg-white",
           )}
         >
