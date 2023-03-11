@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as trpc from "@trpc/server";
-import * as trpcNext from "@trpc/server/adapters/next";
-import { unstable_getServerSession } from "next-auth/next";
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import type { NextRequest } from "next/server";
 import { getUser, User } from "~/server-rsc/getUser";
-import { nextAuthOptions } from "../pages/api/auth/[...nextauth]";
+import { authConfig } from "../next-auth/options";
+import { getSession } from "../next-auth/server";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface CreateContextOptions {
@@ -31,7 +32,7 @@ export async function createContext(
         type: "rsc";
         getUser: typeof getUser;
       }
-    | (trpcNext.CreateNextContextOptions & { type: "api" }),
+    | (Omit<FetchCreateContextFnOptions, "req"> & { type: "api"; req: NextRequest }),
 ) {
   // for API-response caching see https://trpc.io/docs/caching
 
@@ -44,7 +45,7 @@ export async function createContext(
   }
 
   // not RSC
-  const session = await unstable_getServerSession(opts.req, opts.res, nextAuthOptions);
+  const session = await getSession(opts.req, authConfig);
   return {
     type: opts.type,
     user: session?.user,

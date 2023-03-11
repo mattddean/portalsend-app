@@ -1,6 +1,6 @@
+import type { Adapter } from "@auth/core/adapters";
 import { createId } from "@paralleldrive/cuid2";
 import { Kysely, SqliteAdapter } from "kysely";
-import type { Adapter } from "next-auth/adapters";
 import type { Database } from "../../prisma/kysely";
 
 type ReturnData<T = never> = Record<string, Date | string | T>;
@@ -174,6 +174,7 @@ export function KyselyAdapter(db: Kysely<Database>): Adapter {
         .executeTakeFirst();
       if (!result) return null;
       const { sessionId: id, userId, sessionToken, expires, ...user } = result;
+      console.debug("session and user result", result);
       return {
         user: coerceReturnData({ ...user }, "emailVerified"),
         session: coerceReturnData({ id, userId, sessionToken, expires }, "expires"),
