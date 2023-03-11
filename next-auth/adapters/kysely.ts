@@ -174,6 +174,7 @@ export function KyselyAdapter(db: Kysely<Database>): Adapter {
         .executeTakeFirst();
       if (!result) return null;
       const { sessionId: id, userId, sessionToken, expires, ...user } = result;
+      console.debug("session and user result", result);
       return {
         user: coerceReturnData({ ...user }, "emailVerified"),
         session: coerceReturnData({ id, userId, sessionToken, expires }, "expires"),

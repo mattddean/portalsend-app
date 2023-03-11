@@ -66,6 +66,8 @@ export async function getSession(req: Request, options: AuthConfig): GetSessionR
 
   const data = await response.json();
 
+  console.debug("got session data", data);
+
   if (!data || !Object.keys(data).length) return null;
   if (status === 200) return data;
   throw new Error(data.message);

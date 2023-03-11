@@ -2,10 +2,9 @@
  *
  * This is an example router, you can delete this file and then update `../pages/api/trpc/[trpc].tsx`
  */
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { createId } from "@paralleldrive/cuid2";
+// import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+// import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+// import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { db } from "../../prisma/kysely";
@@ -15,15 +14,15 @@ const portalsendFilesS3Bucket = "portalsend-app-files";
 
 // TODO: use env object from env.mjs to get environment variables
 
-const getS3Client = () => {
-  return new S3Client({
-    region: process.env.OUR_AWS_REGION,
-    credentials: {
-      accessKeyId: process.env.OUR_AWS_ACCESS_KEY_ID as string,
-      secretAccessKey: process.env.OUR_AWS_SECRET_ACCESS_KEY as string,
-    },
-  });
-};
+// const getS3Client = () => {
+//   return new S3Client({
+//     region: process.env.OUR_AWS_REGION,
+//     credentials: {
+//       accessKeyId: process.env.OUR_AWS_ACCESS_KEY_ID as string,
+//       secretAccessKey: process.env.OUR_AWS_SECRET_ACCESS_KEY as string,
+//     },
+//   });
+// };
 
 export const exampleRouter = router({
   hello: publicProcedure.input(z.object({ name: z.string() })).query(({ input }) => {
@@ -112,138 +111,138 @@ export const exampleRouter = router({
       return retUsers;
     }),
 
-  createSignedUploadUrl: privateProcedure
-    .input(
-      z.object({
-        /** The shared key encrypted for the user calling this endpoint. */
-        encrypted_key_for_self: z.string(),
-        /** The shared key encrypted for each recipient of the file with each recipient's email address. */
-        encrypted_keys_for_recipients: z.array(z.object({ email: z.string(), encrypted_shared_key: z.string() })),
-        /** The encrypted name of the file, base64 encoded. */
-        encrypted_filename: z.string(),
-        /** Initialization vector used to encrypt the file. */
-        file_iv: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      // TODO: use a db transaction
+  // createSignedUploadUrl: privateProcedure
+  //   .input(
+  //     z.object({
+  //       /** The shared key encrypted for the user calling this endpoint. */
+  //       encrypted_key_for_self: z.string(),
+  //       /** The shared key encrypted for each recipient of the file with each recipient's email address. */
+  //       encrypted_keys_for_recipients: z.array(z.object({ email: z.string(), encrypted_shared_key: z.string() })),
+  //       /** The encrypted name of the file, base64 encoded. */
+  //       encrypted_filename: z.string(),
+  //       /** Initialization vector used to encrypt the file. */
+  //       file_iv: z.string(),
+  //     }),
+  //   )
+  //   .mutation(async ({ ctx, input }) => {
+  //     // TODO: use a db transaction
 
-      const userEmail = ctx.user.email;
-      if (!userEmail) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+  //     const userEmail = ctx.user.email;
+  //     if (!userEmail) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
 
-      const sharedKeySetId = createId();
-      await db
-        .insertInto("SharedKeySet")
-        .values({ created_at: new Date(), updated_at: new Date(), id: sharedKeySetId })
-        .executeTakeFirstOrThrow();
+  //     const sharedKeySetId = createId();
+  //     await db
+  //       .insertInto("SharedKeySet")
+  //       .values({ created_at: new Date(), updated_at: new Date(), id: sharedKeySetId })
+  //       .executeTakeFirstOrThrow();
 
-      for (const encryptedSharedKey of input.encrypted_keys_for_recipients) {
-        const user = await db
-          .selectFrom("User")
-          .select(["id"])
-          .where("email", "=", encryptedSharedKey.email)
-          .executeTakeFirstOrThrow();
-        const sharedKeyId = createId();
-        await db
-          .insertInto("SharedKey")
-          .values([
-            {
-              encrypted_key: encryptedSharedKey.encrypted_shared_key,
-              shared_key_set_id: sharedKeySetId,
-              id: sharedKeyId,
-              created_at: new Date(),
-              updated_at: new Date(),
-            },
-          ])
-          .executeTakeFirstOrThrow();
-        await db
-          .insertInto("FileAccess")
-          .values([
-            {
-              user_id: user.id,
-              shared_key_id: sharedKeyId,
-              original_sender: false,
-              permission: "VIEWER",
-              id: createId(),
-              created_at: new Date(),
-              updated_at: new Date(),
-            },
-          ])
-          .executeTakeFirstOrThrow();
-      }
+  //     for (const encryptedSharedKey of input.encrypted_keys_for_recipients) {
+  //       const user = await db
+  //         .selectFrom("User")
+  //         .select(["id"])
+  //         .where("email", "=", encryptedSharedKey.email)
+  //         .executeTakeFirstOrThrow();
+  //       const sharedKeyId = createId();
+  //       await db
+  //         .insertInto("SharedKey")
+  //         .values([
+  //           {
+  //             encrypted_key: encryptedSharedKey.encrypted_shared_key,
+  //             shared_key_set_id: sharedKeySetId,
+  //             id: sharedKeyId,
+  //             created_at: new Date(),
+  //             updated_at: new Date(),
+  //           },
+  //         ])
+  //         .executeTakeFirstOrThrow();
+  //       await db
+  //         .insertInto("FileAccess")
+  //         .values([
+  //           {
+  //             user_id: user.id,
+  //             shared_key_id: sharedKeyId,
+  //             original_sender: false,
+  //             permission: "VIEWER",
+  //             id: createId(),
+  //             created_at: new Date(),
+  //             updated_at: new Date(),
+  //           },
+  //         ])
+  //         .executeTakeFirstOrThrow();
+  //     }
 
-      const sharedKeyId = createId();
-      await db
-        .insertInto("SharedKey")
-        .values([
-          {
-            encrypted_key: input.encrypted_key_for_self,
-            shared_key_set_id: sharedKeySetId,
-            id: sharedKeyId,
-            created_at: new Date(),
-            updated_at: new Date(),
-          },
-        ])
-        .executeTakeFirstOrThrow();
+  //     const sharedKeyId = createId();
+  //     await db
+  //       .insertInto("SharedKey")
+  //       .values([
+  //         {
+  //           encrypted_key: input.encrypted_key_for_self,
+  //           shared_key_set_id: sharedKeySetId,
+  //           id: sharedKeyId,
+  //           created_at: new Date(),
+  //           updated_at: new Date(),
+  //         },
+  //       ])
+  //       .executeTakeFirstOrThrow();
 
-      await db
-        .insertInto("FileAccess")
-        .values([
-          {
-            user_id: ctx.user.id,
-            shared_key_id: sharedKeyId,
-            original_sender: true,
-            permission: "OWNER",
-            id: createId(),
-            created_at: new Date(),
-            updated_at: new Date(),
-          },
-        ])
-        .executeTakeFirstOrThrow();
+  //     await db
+  //       .insertInto("FileAccess")
+  //       .values([
+  //         {
+  //           user_id: ctx.user.id,
+  //           shared_key_id: sharedKeyId,
+  //           original_sender: true,
+  //           permission: "OWNER",
+  //           id: createId(),
+  //           created_at: new Date(),
+  //           updated_at: new Date(),
+  //         },
+  //       ])
+  //       .executeTakeFirstOrThrow();
 
-      const fileId = createId();
-      await db
-        .insertInto("File")
-        .values([
-          {
-            iv: input.file_iv,
-            encrypted_name: input.encrypted_filename,
-            shared_key_set_id: sharedKeySetId,
-            created_at: new Date(),
-            updated_at: new Date(),
-            id: fileId,
-            slug: createId(),
-            storage_key: createId(),
-          },
-        ])
-        .executeTakeFirstOrThrow();
-      const file = await db
-        .selectFrom("File")
-        .select(["id", "storage_key", "slug"])
-        .where("id", "=", fileId)
-        .executeTakeFirstOrThrow();
+  //     const fileId = createId();
+  //     await db
+  //       .insertInto("File")
+  //       .values([
+  //         {
+  //           iv: input.file_iv,
+  //           encrypted_name: input.encrypted_filename,
+  //           shared_key_set_id: sharedKeySetId,
+  //           created_at: new Date(),
+  //           updated_at: new Date(),
+  //           id: fileId,
+  //           slug: createId(),
+  //           storage_key: createId(),
+  //         },
+  //       ])
+  //       .executeTakeFirstOrThrow();
+  //     const file = await db
+  //       .selectFrom("File")
+  //       .select(["id", "storage_key", "slug"])
+  //       .where("id", "=", fileId)
+  //       .executeTakeFirstOrThrow();
 
-      // Add a one megabyte buffer in case the encrypted version of the file is a bit longer than the unencrypted version.
-      const maxFileSizeBytes = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_BYTES as string) + 1_000_000;
+  //     // Add a one megabyte buffer in case the encrypted version of the file is a bit longer than the unencrypted version.
+  //     const maxFileSizeBytes = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_BYTES as string) + 1_000_000;
 
-      const client = getS3Client();
-      const { url, fields } = await createPresignedPost(client, {
-        Bucket: portalsendFilesS3Bucket,
-        Key: file.storage_key,
-        Conditions: [
-          { bucket: portalsendFilesS3Bucket },
-          ["content-length-range", 0, maxFileSizeBytes], // 0 bytes to maxFilSize bytes
-          ["starts-with", "$Content-Type", ""], // necessary because the frontend will add this form data
-        ],
-        Expires: 5 * 60, //Seconds before the presigned post expires. 3600 by default.
-      });
+  //     const client = getS3Client();
+  //     const { url, fields } = await createPresignedPost(client, {
+  //       Bucket: portalsendFilesS3Bucket,
+  //       Key: file.storage_key,
+  //       Conditions: [
+  //         { bucket: portalsendFilesS3Bucket },
+  //         ["content-length-range", 0, maxFileSizeBytes], // 0 bytes to maxFilSize bytes
+  //         ["starts-with", "$Content-Type", ""], // necessary because the frontend will add this form data
+  //       ],
+  //       Expires: 5 * 60, //Seconds before the presigned post expires. 3600 by default.
+  //     });
 
-      return {
-        signed_url: url,
-        form_data_fields: fields,
-        file_slug: file.slug,
-      };
-    }),
+  //     return {
+  //       signed_url: url,
+  //       form_data_fields: fields,
+  //       file_slug: file.slug,
+  //     };
+  //   }),
 
   getFile: privateProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
     const file = await db
@@ -267,24 +266,24 @@ export const exampleRouter = router({
     };
   }),
 
-  createFileSignedDownloadUrl: privateProcedure.input(z.object({ slug: z.string() })).mutation(async ({ input }) => {
-    const file = await db
-      .selectFrom("File")
-      .select(["storage_key", "name"])
-      .where("slug", "=", input.slug)
-      .executeTakeFirst();
+  // createFileSignedDownloadUrl: privateProcedure.input(z.object({ slug: z.string() })).mutation(async ({ input }) => {
+  //   const file = await db
+  //     .selectFrom("File")
+  //     .select(["storage_key", "name"])
+  //     .where("slug", "=", input.slug)
+  //     .executeTakeFirst();
 
-    if (!file) throw new TRPCError({ code: "NOT_FOUND" });
+  //   if (!file) throw new TRPCError({ code: "NOT_FOUND" });
 
-    const client = getS3Client();
-    const command = new GetObjectCommand({
-      Bucket: portalsendFilesS3Bucket,
-      Key: file.storage_key,
-    });
-    const url = await getSignedUrl(client, command, { expiresIn: 5 * 60 });
+  //   const client = getS3Client();
+  //   const command = new GetObjectCommand({
+  //     Bucket: portalsendFilesS3Bucket,
+  //     Key: file.storage_key,
+  //   });
+  //   const url = await getSignedUrl(client, command, { expiresIn: 5 * 60 });
 
-    return { signed_download_url: url, file_name: file.name };
-  }),
+  //   return { signed_download_url: url, file_name: file.name };
+  // }),
 
   infiniteFiles: privateProcedure
     .input(

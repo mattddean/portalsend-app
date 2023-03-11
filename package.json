@@ -10,6 +10,7 @@
     "db:push": "pnpm with-env prisma db push",
     "db:push-reset": "pnpm with-env prisma db push --skip-generate --force-reset --accept-data-loss",
     "db:seed": "pnpm with-env prisma db seed",
+    "db:studio": "pnpm with-env prisma studio",
     "dev-migrate": "prisma migrate dev",
     "postinstall": "prisma generate",
     "with-env": "dotenv -e ../../.env --"
