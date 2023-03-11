@@ -6,6 +6,7 @@ patchedDependencies:
     path: patches/@tanstack__react-query@4.26.1.patch
 
 specifiers:
+  '@auth/core': ^0.5.1
   '@aws-sdk/client-s3': ^3.282.0
   '@aws-sdk/middleware-endpoint': ^3.282.0
   '@aws-sdk/s3-presigned-post': ^3.284.0
@@ -50,7 +51,6 @@ specifiers:
   buffer: ^6.0.3
   class-variance-authority: ^0.4.0
   clsx: ^1.2.1
-  crypto: ^1.0.1
   date-fns: ^2.29.3
   dotenv-cli: ^6.0.0
   eslint: 8.25.0
@@ -83,6 +83,7 @@ specifiers:
   zod: ^3.19.1
 
 dependencies:
+  '@auth/core': 0.5.1
   '@aws-sdk/client-s3': 3.282.0
   '@aws-sdk/middleware-endpoint': 3.282.0
   '@aws-sdk/s3-presigned-post': 3.284.0
@@ -120,7 +121,6 @@ dependencies:
   buffer: 6.0.3
   class-variance-authority: 0.4.0_typescript@4.8.4
   clsx: 1.2.1
-  crypto: 1.0.1
   date-fns: 2.29.3
   http-status: 1.6.2
   kysely: 0.21.6
@@ -162,6 +162,22 @@ devDependencies:
   typescript: 4.8.4
 
 packages:
+
+  /@auth/core/0.5.1:
+    resolution: {integrity: sha512-t9z8F7dkuVceKWBmMy1fd2t6H+vfRju/YJ1lm+6RnJ7pNEvX5qMR874wg0+cYbWvyZazLi8fFK/FA6I3D5sSkA==}
+    peerDependencies:
+      nodemailer: ^6.8.0
+    peerDependenciesMeta:
+      nodemailer:
+        optional: true
+    dependencies:
+      '@panva/hkdf': 1.0.4
+      cookie: 0.5.0
+      jose: 4.13.1
+      oauth4webapi: 2.2.0
+      preact: 10.11.3
+      preact-render-to-string: 5.2.3_preact@10.11.3
+    dev: false
 
   /@aws-crypto/crc32/3.0.0:
     resolution: {integrity: sha512-IzSgsrxUcsrejQbPVilIKy16kAT52EwB6zSaI+M3xxIhKh5+aldEyvI+z6erM7TCLB2BJsFrtHjp6/4/sr+3dA==}
@@ -2739,11 +2755,6 @@ packages:
       which: 2.0.2
     dev: true
 
-  /crypto/1.0.1:
-    resolution: {integrity: sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==}
-    deprecated: This package is no longer supported. It's now a built-in Node module. If you've depended on crypto, you should switch to the one that's built-in.
-    dev: false
-
   /cssesc/3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
     engines: {node: '>=4'}
@@ -4074,6 +4085,10 @@ packages:
 
   /oauth/0.9.15:
     resolution: {integrity: sha512-a5ERWK1kh38ExDEfoO6qUHJb32rd7aYmPHuyCu3Fta/cnICvYmgd2uhuKXvPD+PXB+gCEYYEaQdIRAjCOwAKNA==}
+    dev: false
+
+  /oauth4webapi/2.2.0:
+    resolution: {integrity: sha512-yHJIXtjeQil8BfBvu0PUu38a2DNPOPcEOhzNdg/HytfKPGQk1hTg5j94zZ3bon9YBIAhW5PSmFv+n6bqq0v0uQ==}
     dev: false
 
   /object-assign/4.1.1:
