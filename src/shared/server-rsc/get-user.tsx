@@ -1,6 +1,6 @@
 import type { AsyncLocalStorage } from "async_hooks";
 import { cookies } from "next/headers";
-import { db } from "../../../prisma/kysely";
+import { db } from "~/lib/kysely-db";
 
 interface LocalStorageContext {
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -16,7 +16,7 @@ export interface User {
   email: string;
   name: string;
 }
-export async function getUser(): Promise<User | null> {
+export async function getUser() {
   const newCookies = cookies()
     .getAll()
     .reduce((cookiesObj, cookie) => {
@@ -36,7 +36,7 @@ export async function getUser(): Promise<User | null> {
 
   return {
     id: session.user_id,
-    name: session.user_name!,
-    email: session.user_email!,
+    name: session.user_name ?? undefined,
+    email: session.user_email,
   };
 }

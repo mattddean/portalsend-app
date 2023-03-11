@@ -9,8 +9,9 @@ import { MainNav } from "~/components/main-nav";
 import { MobileNav } from "~/components/mobile-nav";
 import { ThemeProvider } from "~/components/theme-provider";
 import { cn } from "~/components/ui/lib/utils";
+import { rsc } from "~/shared/server-rsc/trpc";
 import { ClientProvider } from "~/trpc/client/trpc-client";
-import { Avatar } from "./avatar";
+import { MainDropdownMenu } from "./main-dropdown-menu";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -25,7 +26,14 @@ export const metadata = {
   },
 };
 
-export default function RootLayout(props: PropsWithChildren) {
+export default async function RootLayout(props: PropsWithChildren) {
+  const user = await rsc.whoami.fetch();
+
+  const avatarFallbackText = (() => {
+    const userName = user?.name;
+    return userName?.[0];
+  })();
+
   return (
     <html lang="en">
       <ClientProvider>
@@ -43,7 +51,7 @@ export default function RootLayout(props: PropsWithChildren) {
                   <MobileNav />
                   <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
                     <nav className="flex items-center space-x-2">
-                      <Avatar />
+                      <>{!!user && <MainDropdownMenu avatarFallbackText={avatarFallbackText} user={user} />}</>
                     </nav>
                   </div>
                 </div>

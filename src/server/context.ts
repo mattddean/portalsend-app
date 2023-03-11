@@ -2,9 +2,9 @@
 import * as trpc from "@trpc/server";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import type { NextRequest } from "next/server";
-import { getUser, User } from "~/shared/server-rsc/getUser";
-import { authConfig } from "../auth/options";
-import { getSession } from "../auth/server";
+import { authConfig } from "~/auth/options";
+import { getSession } from "~/auth/server";
+import { getUser, User } from "~/shared/server-rsc/get-user";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface CreateContextOptions {

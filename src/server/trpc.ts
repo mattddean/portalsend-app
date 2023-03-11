@@ -45,7 +45,12 @@ export const router = t.router;
 export const publicProcedure = t.procedure.use((opts) => {
   return opts.next({
     ctx: {
-      user: opts.ctx.user,
+      user: {
+        id: opts.ctx.user?.id,
+        name: opts.ctx.user?.name ?? undefined,
+        email: opts.ctx.user?.email ?? undefined,
+        image: (opts.ctx.user as { image?: string } | undefined)?.image,
+      },
     },
   });
 });
