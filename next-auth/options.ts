@@ -1,10 +1,10 @@
-import NextAuth, { type NextAuthOptions } from "next-auth";
-import GithubProvider from "next-auth/providers/github";
-import GoogleProvider from "next-auth/providers/google";
-import { KyselyAdapter } from "../../../next-auth/adapters/kysely";
-import { db } from "../../../prisma/kysely";
+import GithubProvider from "@auth/core/providers/github";
+import GoogleProvider from "@auth/core/providers/google";
+import { KyselyAdapter } from "~/next-auth/adapters/kysely";
+import { db } from "~/prisma/kysely";
+import { SolidAuthConfig } from "./server";
 
-export const nextAuthOptions: NextAuthOptions = {
+export const authConfig: SolidAuthConfig = {
   // Configure one or more authentication providers
   adapter: KyselyAdapter(db),
   providers: [
@@ -26,5 +26,3 @@ export const nextAuthOptions: NextAuthOptions = {
     },
   },
 };
-
-export default NextAuth(nextAuthOptions);

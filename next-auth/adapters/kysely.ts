@@ -1,6 +1,6 @@
+import type { Adapter } from "@auth/core/adapters";
 import { createId } from "@paralleldrive/cuid2";
 import { Kysely, SqliteAdapter } from "kysely";
-import type { Adapter } from "next-auth/adapters";
 import type { Database } from "../../prisma/kysely";
 
 type ReturnData<T = never> = Record<string, Date | string | T>;
