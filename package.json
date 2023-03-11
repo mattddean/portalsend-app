@@ -13,7 +13,7 @@
     "db:studio": "pnpm with-env prisma studio",
     "dev-migrate": "prisma migrate dev",
     "postinstall": "prisma generate",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "dotenv -e ../../../.env --"
   },
   "dependencies": {
     "@auth/core": "0.0.0-a775c46b1",
@@ -53,6 +53,7 @@
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.4.0",
     "clsx": "^1.2.1",
+    "cookie": "^0.5.0",
     "date-fns": "^2.29.3",
     "http-status": "^1.6.2",
     "kysely": "0.21.6",
@@ -69,6 +70,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-loading-icons": "^1.1.0",
+    "set-cookie-parser": "^2.5.1",
     "superjson": "^1.10.1",
     "tailwind-merge": "^1.9.1",
     "tailwindcss-animate": "^1.0.5",
@@ -78,8 +80,10 @@
     "@cloudflare/next-on-pages": "^0.3.0",
     "@manypkg/cli": "^0.19.2",
     "@tailwindcss/forms": "^0.5.3",
+    "@types/cookie": "^0.5.1",
     "@types/node": "18.8.5",
     "@types/react": "18.0.21",
+    "@types/set-cookie-parser": "^2.4.2",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.37.0",
     "autoprefixer": "^10.4.13",

@@ -43,14 +43,17 @@ specifiers:
   '@trpc/client': ^10.14.1
   '@trpc/react-query': ^10.14.1
   '@trpc/server': ^10.14.1
+  '@types/cookie': ^0.5.1
   '@types/node': 18.8.5
   '@types/react': 18.0.21
+  '@types/set-cookie-parser': ^2.4.2
   '@typescript-eslint/eslint-plugin': ^5.37.0
   '@typescript-eslint/parser': ^5.37.0
   autoprefixer: ^10.4.13
   buffer: ^6.0.3
   class-variance-authority: ^0.4.0
   clsx: ^1.2.1
+  cookie: ^0.5.0
   date-fns: ^2.29.3
   dotenv-cli: ^6.0.0
   eslint: 8.25.0
@@ -75,6 +78,7 @@ specifiers:
   react-dom: ^18.2.0
   react-dropzone: ^14.2.3
   react-loading-icons: ^1.1.0
+  set-cookie-parser: ^2.5.1
   superjson: ^1.10.1
   tailwind-merge: ^1.9.1
   tailwindcss: ^3.2.1
@@ -123,6 +127,7 @@ dependencies:
   buffer: 6.0.3
   class-variance-authority: 0.4.0_typescript@4.8.4
   clsx: 1.2.1
+  cookie: 0.5.0
   date-fns: 2.29.3
   http-status: 1.6.2
   kysely: 0.21.6
@@ -139,6 +144,7 @@ dependencies:
   react-dom: 18.2.0_react@18.2.0
   react-dropzone: 14.2.3_react@18.2.0
   react-loading-icons: 1.1.0
+  set-cookie-parser: 2.5.1
   superjson: 1.10.1
   tailwind-merge: 1.10.0
   tailwindcss-animate: 1.0.5_tailwindcss@3.2.1
@@ -148,8 +154,10 @@ devDependencies:
   '@cloudflare/next-on-pages': 0.3.0_vercel@28.16.15
   '@manypkg/cli': 0.19.2
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.1
+  '@types/cookie': 0.5.1
   '@types/node': 18.8.5
   '@types/react': 18.0.21
+  '@types/set-cookie-parser': 2.4.2
   '@typescript-eslint/eslint-plugin': 5.40.0_25sstg4uu2sk4pm7xcyzuov7xq
   '@typescript-eslint/parser': 5.40.0_z4bbprzjrhnsfa24uvmcbu7f5q
   autoprefixer: 10.4.13_postcss@8.4.18
@@ -1279,7 +1287,7 @@ packages:
       '@babel/compat-data': 7.21.0
       '@babel/core': 7.21.0
       '@babel/helper-validator-option': 7.21.0
-      browserslist: 4.21.4
+      browserslist: 4.21.5
       lru-cache: 5.1.1
       semver: 6.3.0
     dev: true
@@ -4249,6 +4257,10 @@ packages:
     resolution: {integrity: sha512-XW/Aa8APYr6jSVVA1y/DEIZX0/GMKLEVekNG727R8cs56ahETkRAy/3DR7+fJyh7oUgGwNQaRfXCun0+KbWY7Q==}
     dev: true
 
+  /@types/cookie/0.5.1:
+    resolution: {integrity: sha512-COUnqfB2+ckwXXSFInsFdOAWQzCCx+a5hq2ruyj+Vjund94RJQd4LG2u9hnvJrTgunKAaax7ancBYlDrNYxA0g==}
+    dev: true
+
   /@types/debug/4.1.7:
     resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
     dependencies:
@@ -4353,6 +4365,12 @@ packages:
 
   /@types/semver/6.2.3:
     resolution: {integrity: sha512-KQf+QAMWKMrtBMsB8/24w53tEsxllMj6TuA80TT/5igJalLI/zm0L3oXRbIAl4Ohfc85gyHX/jhMwsVkmhLU4A==}
+    dev: true
+
+  /@types/set-cookie-parser/2.4.2:
+    resolution: {integrity: sha512-fBZgytwhYAUkj/jC/FAV4RQ5EerRup1YQsXQCh8rZfiHkc4UahC192oH0smGwsXol3cL3A5oETuAHeQHmhXM4w==}
+    dependencies:
+      '@types/node': 18.8.5
     dev: true
 
   /@types/unist/2.0.6:
@@ -10135,7 +10153,6 @@ packages:
 
   /set-cookie-parser/2.5.1:
     resolution: {integrity: sha512-1jeBGaKNGdEq4FgIrORu/N570dwoPYio8lSoYLWmX7sQ//0JY08Xh9o5pBcgmHQ/MbsYp/aZnOe1s1lIsbLprQ==}
-    dev: true
 
   /setprototypeof/1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
