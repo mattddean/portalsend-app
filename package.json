@@ -75,6 +75,7 @@
     "zod": "^3.19.1"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^0.3.0",
     "@manypkg/cli": "^0.19.2",
     "@tailwindcss/forms": "^0.5.3",
     "@types/node": "18.8.5",
@@ -93,7 +94,8 @@
     "tailwindcss": "^3.2.1",
     "turbo": "^1.6.3",
     "type-fest": "^3.6.1",
-    "typescript": "4.8.4"
+    "typescript": "4.8.4",
+    "vercel": "^28.16.15"
   },
   "prisma": {
     "seed": "pnpm dlx tsx prisma/seed.ts"
