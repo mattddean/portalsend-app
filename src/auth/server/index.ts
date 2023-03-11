@@ -1,8 +1,10 @@
+/** https://github.com/nextauthjs/next-auth/blob/04791cd57478b64d0ebdfc8fe25779e2f89e2070/packages/frameworks-solid-start/src/index.ts#L1 */
+
 import { Auth } from "@auth/core";
 import type { AuthAction, AuthConfig, Session } from "@auth/core/types";
 import { serialize } from "cookie";
 import type { NextRequest } from "next/server";
-import { Cookie, parseString, splitCookiesString } from "set-cookie-parser";
+import { parseString, splitCookiesString, type Cookie } from "set-cookie-parser";
 
 export interface SolidAuthConfig extends AuthConfig {
   /**

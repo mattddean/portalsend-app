@@ -1,6 +1,6 @@
 import type { AsyncLocalStorage } from "async_hooks";
 import { cookies } from "next/headers";
-import { db } from "~/prisma/kysely";
+import { db } from "../../../prisma/kysely";
 
 interface LocalStorageContext {
   // eslint-disable-next-line @typescript-eslint/ban-types

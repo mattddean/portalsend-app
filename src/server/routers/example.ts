@@ -7,7 +7,7 @@
 // import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { db } from "../../prisma/kysely";
+import { db } from "~/lib/kysely-db";
 import { privateProcedure, publicProcedure, router } from "../trpc";
 
 const portalsendFilesS3Bucket = "portalsend-app-files";

@@ -4,7 +4,6 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { NextPage } from "next";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { api } from "~/client/trpcClient";
 import { AlertTriangleIcon, CheckIcon, CopyIcon, SpinnerIcon } from "~/components/icons";
 import SignInButtons from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
@@ -30,6 +29,7 @@ import {
   generateRsaKeyPair,
   serializeKey,
 } from "~/lib/key-utils";
+import { api } from "~/trpc/client/trpc-client";
 
 export const runtime = "edge";
 

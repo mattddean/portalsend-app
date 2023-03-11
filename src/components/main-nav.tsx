@@ -11,7 +11,7 @@ import {
   NavigationMenuTrigger,
 } from "~/components/ui/navigation-menu";
 import { siteConfig } from "~/config/site";
-import { api } from "../client/trpcClient";
+import { api } from "../trpc/client/trpc-client";
 import { LogoIcon } from "./icons";
 import { cn } from "./ui/lib/utils";
 

@@ -4,7 +4,6 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { NextPage } from "next";
 import { FC, useReducer, useState } from "react";
 import { Grid } from "react-loading-icons";
-import { api } from "~/client/trpcClient";
 import SignInButtons from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
 import {
@@ -19,6 +18,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/h
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { decryptFile, decryptRsaPrivateKey, stringToUint8Array } from "~/lib/key-utils";
+import { api } from "~/trpc/client/trpc-client";
 
 export const runtime = "edge";
 

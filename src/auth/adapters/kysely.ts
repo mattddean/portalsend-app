@@ -1,7 +1,7 @@
 import type { Adapter } from "@auth/core/adapters";
 import { createId } from "@paralleldrive/cuid2";
 import { Kysely, SqliteAdapter } from "kysely";
-import type { Database } from "../../prisma/kysely";
+import type { Database } from "~/lib/kysely-db";
 
 type ReturnData<T = never> = Record<string, Date | string | T>;
 
@@ -237,6 +237,63 @@ export function KyselyAdapter(db: Kysely<Database>): Adapter {
 }
 
 /**
+ * The following is a reference of the database schema that @auth/core requires
+ */
+
+import type { Generated } from "kysely";
+
+interface User {
+  id: Generated<string>;
+  name: string | null;
+  email: string | null;
+  emailVerified: Date | string | null;
+  image: string | null;
+}
+
+interface Account {
+  id: Generated<string>;
+  userId: string;
+  type: string;
+  provider: string;
+  providerAccountId: string;
+  access_token: string | null;
+  expires_in: number | null;
+  id_token: string | null;
+  refresh_token: string | null;
+  refresh_token_expires_in: number | null;
+  scope: string | null;
+  token_type: string | null;
+  /** I don't think this property is actually required by @auth/core */
+  // expires_at: number | null;
+  /** I don't think this property is actually required by @auth/core */
+  // session_state: string | null;
+  /** I don't think this property is actually required by @auth/core */
+  // oauth_token_secret: string | null;
+  /** I don't think this property is actually required by @auth/core */
+  // oauth_token: string | null;
+}
+
+interface Session {
+  id: Generated<string>;
+  userId: string;
+  sessionToken: string;
+  expires: Date | string;
+}
+
+interface VerificationToken {
+  identifier: string;
+  token: string;
+  expires: Date | string;
+}
+
+interface ReferenceSchema {
+  User: User;
+  Account: Account;
+  Session: Session;
+  VerificationToken: VerificationToken;
+}
+
+/**
  * Wrapper over the original Kysely class in order to validate the passed in
  * database interface. A regular Kysely instance may also be used, but wrapping
  * it ensures the database interface implements the fields that NextAuth
@@ -244,8 +301,8 @@ export function KyselyAdapter(db: Kysely<Database>): Adapter {
  * the second generic argument. The generated types will be used, and
  * AuthedKysely will only verify that the correct fields exist.
  **/
-export class AuthedKysely<DB extends T, T = Database> extends Kysely<DB> {}
+export class AuthedKysely<DB extends T, T = ReferenceSchema> extends Kysely<DB> {}
 
 export type Codegen = {
-  [K in keyof Database]: { [J in keyof Database[K]]: unknown };
+  [K in keyof ReferenceSchema]: { [J in keyof ReferenceSchema[K]]: unknown };
 };

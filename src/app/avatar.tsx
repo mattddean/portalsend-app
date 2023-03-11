@@ -1,7 +1,7 @@
 "use client";
 
 import type { FC } from "react";
-import { api } from "~/client/trpcClient";
+import { api } from "~/trpc/client/trpc-client";
 import { MainDropdownMenu } from "./main-dropdown-menu";
 
 export const Avatar: FC = () => {

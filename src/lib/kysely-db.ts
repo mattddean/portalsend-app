@@ -9,7 +9,7 @@ import type {
   VerificationToken,
 } from "@prisma/client/edge";
 import { PlanetScaleDialect } from "kysely-planetscale";
-import { AuthedKysely, Codegen } from "../next-auth/adapters/kysely";
+import { AuthedKysely, Codegen } from "~/auth/adapters/kysely";
 
 export interface Database {
   Account: Account;

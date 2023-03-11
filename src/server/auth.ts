@@ -1,13 +1,13 @@
-export type { Session } from "next-auth";
-import type { DefaultSession } from "next-auth";
+export type { DefaultSession, Session } from "@auth/core/types";
+
 /**
- * Module augmentation for `next-auth` types
+ * Module augmentation for `@auth/core/types` types
  * Allows us to add custom properties to the `session` object
  * and keep type safety
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 
-declare module "next-auth" {
+declare module "@auth/core/types" {
   interface Session extends DefaultSession {
     user: {
       id: string;

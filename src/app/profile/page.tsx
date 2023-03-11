@@ -2,13 +2,13 @@
 
 import type { NextPage } from "next";
 import { FormEventHandler, useState } from "react";
-import { api } from "~/client/trpcClient";
 import { LockIcon } from "~/components/icons";
 import SignInButtons from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { arrayBufferToString, encryptRsaPrivateKey, generateRsaKeyPair, serializeKey } from "~/lib/key-utils";
+import { api } from "~/trpc/client/trpc-client";
 
 export const runtime = "edge";
 

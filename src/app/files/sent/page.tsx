@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FC } from "react";
-import { api } from "~/client/trpcClient";
 import { FilesTable } from "~/components/files/table";
 import SignInButtons from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
@@ -10,6 +9,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/h
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { decryptRsaPrivateKey, stringToUint8Array } from "~/lib/key-utils";
+import { api } from "~/trpc/client/trpc-client";
 
 export const runtime = "edge";
 

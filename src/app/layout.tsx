@@ -4,12 +4,12 @@ import { Inter as FontSans } from "next/font/google";
 import Link from "next/link";
 import Script from "next/script";
 import { PropsWithChildren } from "react";
-import { ClientProvider } from "~/client/trpcClient";
 import { LogoIcon } from "~/components/icons";
 import { MainNav } from "~/components/main-nav";
 import { MobileNav } from "~/components/mobile-nav";
 import { ThemeProvider } from "~/components/theme-provider";
 import { cn } from "~/components/ui/lib/utils";
+import { ClientProvider } from "~/trpc/client/trpc-client";
 import { Avatar } from "./avatar";
 
 const fontSans = FontSans({

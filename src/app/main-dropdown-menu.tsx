@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { FC } from "react";
+import { signOut } from "~/auth/client";
 import { LogOutIcon, UserIcon } from "~/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -14,7 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { signOut } from "~/next-auth/client";
 
 export interface Props {
   avatarFallbackText?: string;

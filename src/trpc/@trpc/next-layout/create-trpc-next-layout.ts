@@ -11,7 +11,7 @@ import {
   ProcedureRouterRecord,
 } from "@trpc/server";
 import { createRecursiveProxy } from "@trpc/server/shared";
-import { getRequestStorage } from "./localStorage";
+import { getRequestStorage } from "./local-storage";
 
 import { dehydrate, QueryClient } from "@tanstack/query-core";
 

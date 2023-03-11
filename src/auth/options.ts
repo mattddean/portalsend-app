@@ -1,7 +1,7 @@
 import GithubProvider from "@auth/core/providers/github";
 import GoogleProvider from "@auth/core/providers/google";
-import { KyselyAdapter } from "~/next-auth/adapters/kysely";
-import { db } from "~/prisma/kysely";
+import { KyselyAdapter } from "~/auth/adapters/kysely";
+import { db } from "~/lib/kysely-db";
 import { SolidAuthConfig } from "./server";
 
 export const authConfig: SolidAuthConfig = {

@@ -1,5 +1,5 @@
-import { authConfig } from "~/next-auth/options";
-import { SolidAuth } from "~/next-auth/server";
+import { authConfig } from "~/auth/options";
+import { SolidAuth } from "~/auth/server";
 
 const handler = SolidAuth(authConfig);
 const get = handler.GET;

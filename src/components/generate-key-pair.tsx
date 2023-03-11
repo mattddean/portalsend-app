@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ChangeEvent, FC, useState } from "react";
-import { api } from "~/client/trpcClient";
+import { api } from "~/trpc/client/trpc-client";
 import { arrayBufferToString, encryptRsaPrivateKey, generateRsaKeyPair, serializeKey } from "../lib/key-utils";
 
 export const KeyPairGenerator: FC = () => {
