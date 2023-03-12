@@ -24,48 +24,60 @@ async function handler(request: NextRequest) {
 
   // Object.fromEntries(heads);
 
-  // const req = new NextRequest({
-  //   url: request.url,
-  //   headers: heads,
-  //   cache: request.cache,
-  //   credentials: request.credentials,
-  //   destination: request.destination,
-  //   integrity: request.integrity,
-  //   keepalive: request.keepalive,
-  //   method: request.method,
-  //   mode: request.mode,
-  //   redirect: request.redirect,
-  //   referrer: request.referrer,
-  //   referrerPolicy: request.referrerPolicy,
-  //   signal: request.signal,
-  //   clone: request.clone,
-  //   body: request.body,
-  //   bodyUsed: request.bodyUsed,
-  //   arrayBuffer: request.arrayBuffer,
-  //   blob: request.blob,
-  //   formData: request.formData,
-  //   json: request.json,
-  //   text: request.text,
+  // const updatedHeaders = new Headers();
+  // headers().forEach((value, key) => {
+  //   updatedHeaders.set(key, value);
+  // });
+
+  const req = new Request(request.url, {
+    headers: request.headers,
+    cache: request.cache,
+    credentials: request.credentials,
+    // destination: request.destination,
+    integrity: request.integrity,
+    keepalive: request.keepalive,
+    method: request.method,
+    mode: request.mode,
+    redirect: request.redirect,
+    referrer: request.referrer,
+    referrerPolicy: request.referrerPolicy,
+    signal: request.signal,
+    // clone: request.clone,
+    body: request.body,
+    // bodyUsed: request.bodyUsed,
+    // arrayBuffer: request.arrayBuffer,
+    // blob: request.blob,
+    // formData: request.formData,
+    // json: request.json,
+    // text: request.text,
+  });
+  // for some reason we can't set the header values as part of creating the request, so we do it like this
+  // headers().forEach((value, key) => {
+  //   req.headers.set(key, value);
   // });
 
   // console.debug("req.url", req.url);
 
   // const newReq = request.clone();
 
-  // console.debug("\nbreak here");
-  // console.debug("content type", heads.get("Content-Type"));
-  // console.debug("accept", heads.get("Accept"));
+  console.debug("\nbreak here");
+  // console.debug("request content type", request.headers.get("Content-Type"));
+  // console.debug(" accept", request.headers.get("Accept"));
 
-  // console.debug("content type", req.headers.get("Content-Type"));
-  // console.debug("accept", req.headers.get("Accept"));
+  // console.debug("req.headers content type", req.headers.get("Content-Type"));
+  // console.debug("req.headers accept", req.headers.get("Accept"));
 
-  // console.debug("content type", newHeaders.get("Content-Type"));
-  // console.debug("accept", newHeaders.get("Accept"));
+  // console.debug("updatedHeaders content type", updatedHeaders.get("Content-Type"));
+  // console.debug("updatedHeaders accept", updatedHeaders.get("Accept"));
 
-  // console.debug("content type", newReq.headers.get("Content-Type"));
-  // console.debug("accept", newReq.headers.get("Accept"));
+  // req.headers.forEach((value, key) => {
+  //   console.debug("header", key, value);
+  // });
 
-  const response = await SolidAuthHandler(request, prefix, authOptions);
+  console.debug("request content-type", request.headers.get("content-type"));
+  console.debug("req content-type", req.headers.get("content-type"));
+
+  const response = await SolidAuthHandler(req, prefix, authOptions);
   return response;
 }
 
