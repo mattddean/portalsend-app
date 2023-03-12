@@ -3,7 +3,6 @@
 import { Auth } from "@auth/core";
 import type { AuthAction, AuthConfig, Session } from "@auth/core/types";
 import { serialize } from "cookie";
-import type { NextRequest } from "next/server";
 import { parseString, splitCookiesString, type Cookie } from "set-cookie-parser";
 
 export interface SolidAuthConfig extends AuthConfig {
@@ -45,11 +44,14 @@ const getSetCookieCallback = (cook?: string | null): Cookie | undefined => {
   return parseString(splitCookie?.[0] ?? ""); // just return the first cookie if no session token is found
 };
 
-export async function SolidAuthHandler(request: NextRequest, prefix: string, authOptions: SolidAuthConfig) {
+export async function SolidAuthHandler(request: Request, prefix: string, authOptions: SolidAuthConfig) {
   const url = new URL(request.url);
   const action = url.pathname.slice(prefix.length + 1).split("/")[0] as AuthAction;
 
+  console.debug("action", action);
+
   if (!actions.includes(action) || !url.pathname.startsWith(prefix + "/")) {
+    console.debug("early exit");
     return;
   }
 
@@ -57,6 +59,7 @@ export async function SolidAuthHandler(request: NextRequest, prefix: string, aut
   if (["callback", "signin", "signout"].includes(action)) {
     const parsedCookie = getSetCookieCallback(res.clone().headers.get("Set-Cookie"));
     if (parsedCookie) {
+      console.debug("setting cookie", parsedCookie.name, parsedCookie.value);
       res.headers.set("Set-Cookie", serialize(parsedCookie.name, parsedCookie.value, parsedCookie as any));
     }
   }
