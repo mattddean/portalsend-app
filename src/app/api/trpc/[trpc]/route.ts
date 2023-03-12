@@ -1,5 +1,4 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { createContext } from "~/server/context";
 import { appRouter } from "~/server/routers/_app";
@@ -15,7 +14,7 @@ const handler = (request: NextRequest) => {
     createContext(opts) {
       return createContext({
         type: "api",
-        getUser: createGetUser(cookies()),
+        getUser: createGetUser(),
         ...opts,
       });
     },
