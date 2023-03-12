@@ -2,6 +2,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import type { NextRequest } from "next/server";
 import { createContext } from "~/server/context";
 import { appRouter } from "~/server/routers/_app";
+import { getUser } from "~/shared/server-rsc/get-user";
 
 export const runtime = "edge";
 
@@ -13,8 +14,8 @@ const handler = (request: NextRequest) => {
     createContext(opts) {
       return createContext({
         type: "api",
+        getUser,
         ...opts,
-        req: opts.req as NextRequest,
       });
     },
     onError({ error }) {

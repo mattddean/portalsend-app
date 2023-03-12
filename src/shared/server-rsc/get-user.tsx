@@ -6,11 +6,12 @@ interface LocalStorageContext {
   // eslint-disable-next-line @typescript-eslint/ban-types
   trpc: {};
 }
+
 const asyncStorage: AsyncLocalStorage<LocalStorageContext> =
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require("next/dist/client/components/request-async-storage").requestAsyncStorage;
-
 asyncStorage.getStore();
+
 export interface User {
   id: string;
   email: string;

@@ -1,6 +1,6 @@
 export interface NavItem {
   title: string;
-  href?: string;
+  href?: "/files/sent" | "/files/received";
   disabled?: boolean;
   external?: boolean;
   label?: string;

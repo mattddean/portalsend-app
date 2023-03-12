@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as trpc from "@trpc/server";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
-import type { NextRequest } from "next/server";
-import { authConfig } from "~/auth/options";
-import { getSession } from "~/auth/server";
 import { getUser, User } from "~/shared/server-rsc/get-user";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -27,17 +24,18 @@ export async function createContextInner(opts: CreateContextOptions) {
  * @link https://trpc.io/docs/context
  */
 export async function createContext(
-  opts: // HACKs because we can't import `next/cookies` in `/api`-routes
-  | {
+  // HACKs because we can't import `next/cookies` in `/api`-routes
+  opts:
+    | {
         type: "rsc";
         getUser: typeof getUser;
       }
-    | (Omit<FetchCreateContextFnOptions, "req"> & { type: "api"; req: NextRequest }),
+    | (FetchCreateContextFnOptions & { type: "api"; getUser: typeof getUser }),
 ) {
   // for API-response caching see https://trpc.io/docs/caching
 
+  // RSC
   if (opts.type === "rsc") {
-    // RSC
     return {
       type: opts.type,
       user: await opts.getUser(),
@@ -45,10 +43,9 @@ export async function createContext(
   }
 
   // not RSC
-  const session = await getSession(opts.req, authConfig);
   return {
     type: opts.type,
-    user: session?.user,
+    user: await opts.getUser(),
   };
 }
 
