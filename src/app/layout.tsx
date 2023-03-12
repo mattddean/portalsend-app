@@ -49,6 +49,7 @@ export default async function RootLayout(props: PropsWithChildren) {
                 <div className="container flex h-16 items-center">
                   <MainNav />
                   <MobileNav />
+                  {/* Avatar */}
                   <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
                     <nav className="flex items-center space-x-2">
                       <>{!!user && <MainDropdownMenu avatarFallbackText={avatarFallbackText} user={user} />}</>
