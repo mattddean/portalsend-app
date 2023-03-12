@@ -48,10 +48,7 @@ export async function SolidAuthHandler(request: Request, prefix: string, authOpt
   const url = new URL(request.url);
   const action = url.pathname.slice(prefix.length + 1).split("/")[0] as AuthAction;
 
-  console.debug("action", action);
-
   if (!actions.includes(action) || !url.pathname.startsWith(prefix + "/")) {
-    console.debug("early exit");
     return;
   }
 
@@ -59,7 +56,6 @@ export async function SolidAuthHandler(request: Request, prefix: string, authOpt
   if (["callback", "signin", "signout"].includes(action)) {
     const parsedCookie = getSetCookieCallback(res.clone().headers.get("Set-Cookie"));
     if (parsedCookie) {
-      console.debug("setting cookie", parsedCookie.name, parsedCookie.value);
       res.headers.set("Set-Cookie", serialize(parsedCookie.name, parsedCookie.value, parsedCookie as any));
     }
   }
