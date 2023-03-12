@@ -1,8 +1,9 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { createContext } from "~/server/context";
 import { appRouter } from "~/server/routers/_app";
-import { getUser } from "~/shared/server-rsc/get-user";
+import { createGetUser } from "~/shared/server-rsc/get-user";
 
 export const runtime = "edge";
 
@@ -14,7 +15,7 @@ const handler = (request: NextRequest) => {
     createContext(opts) {
       return createContext({
         type: "api",
-        getUser,
+        getUser: createGetUser(cookies()),
         ...opts,
       });
     },
@@ -26,5 +27,4 @@ const handler = (request: NextRequest) => {
   });
 };
 
-export const GET = handler;
-export const POST = handler;
+export { handler as GET, handler as POST };

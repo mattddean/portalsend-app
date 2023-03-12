@@ -1,19 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as trpc from "@trpc/server";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
-import { getUser, User } from "~/shared/server-rsc/get-user";
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface CreateContextOptions {
-  user: User | null;
-  rsc: boolean;
-}
+import type { GetUser, User } from "~/shared/server-rsc/get-user";
 
 /**
  * Inner function for `createContext` where we create the context.
  * This is useful for testing when we don't want to mock Next.js' request/response
  */
-export async function createContextInner(opts: CreateContextOptions) {
+export async function createContextInner(opts: { user: User | null; rsc: boolean }) {
   return {
     user: opts.user,
   };
@@ -28,9 +22,9 @@ export async function createContext(
   opts:
     | {
         type: "rsc";
-        getUser: typeof getUser;
+        getUser: GetUser;
       }
-    | (FetchCreateContextFnOptions & { type: "api"; getUser: typeof getUser }),
+    | (FetchCreateContextFnOptions & { type: "api"; getUser: GetUser }),
 ) {
   // for API-response caching see https://trpc.io/docs/caching
 

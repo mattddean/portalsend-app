@@ -1,43 +1,37 @@
-import type { AsyncLocalStorage } from "async_hooks";
-import { cookies } from "next/headers";
+import type { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
+import type { ReadonlyRequestCookies } from "next/dist/server/app-render";
 import { db } from "~/lib/kysely-db";
-
-interface LocalStorageContext {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  trpc: {};
-}
-
-const asyncStorage: AsyncLocalStorage<LocalStorageContext> =
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require("next/dist/client/components/request-async-storage").requestAsyncStorage;
-asyncStorage.getStore();
 
 export interface User {
   id: string;
   email: string;
-  name: string;
+  name: string | undefined;
 }
-export async function getUser() {
-  const newCookies = cookies()
-    .getAll()
-    .reduce((cookiesObj, cookie) => {
+
+export type GetUser = () => Promise<User | null>;
+
+export function createGetUser(cookies: RequestCookies | ReadonlyRequestCookies) {
+  return async () => {
+    const newCookies = cookies.getAll().reduce((cookiesObj, cookie) => {
       cookiesObj[cookie.name] = cookie.value;
       return cookiesObj;
     }, {} as Record<string, string>);
 
-  const sessionToken = newCookies["next-auth.session-token"];
-  if (!sessionToken) return null;
+    const sessionToken = newCookies["next-auth.session-token"];
+    if (!sessionToken) return null;
 
-  const session = await db
-    .selectFrom("Session")
-    .innerJoin("User", "User.id", "Session.userId")
-    .select(["User.email as user_email", "User.name as user_name", "User.id as user_id"])
-    .executeTakeFirst();
-  if (!session) return null;
+    const session = await db
+      .selectFrom("Session")
+      .innerJoin("User", "User.id", "Session.userId")
+      .select(["User.email as user_email", "User.name as user_name", "User.id as user_id"])
+      .executeTakeFirst();
+    if (!session) return null;
 
-  return {
-    id: session.user_id,
-    name: session.user_name ?? undefined,
-    email: session.user_email,
+    const user: User = {
+      id: session.user_id,
+      name: session.user_name ?? undefined,
+      email: session.user_email,
+    };
+    return user;
   };
 }
