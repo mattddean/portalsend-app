@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import * as trpc from "@trpc/server";
+import type { inferAsyncReturnType } from "@trpc/server";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import type { GetUser, User } from "~/shared/server-rsc/get-user";
 
@@ -43,4 +43,4 @@ export async function createContext(
   };
 }
 
-export type Context = trpc.inferAsyncReturnType<typeof createContext>;
+export type Context = inferAsyncReturnType<typeof createContext>;
