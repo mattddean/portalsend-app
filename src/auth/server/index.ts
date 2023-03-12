@@ -45,43 +45,22 @@ const getSetCookieCallback = (cook?: string | null): Cookie | undefined => {
   return parseString(splitCookie?.[0] ?? ""); // just return the first cookie if no session token is found
 };
 
-function SolidAuthHandler(prefix: string, authOptions: SolidAuthConfig) {
-  return async (request: NextRequest) => {
-    const url = new URL(request.url);
-    const action = url.pathname.slice(prefix.length + 1).split("/")[0] as AuthAction;
+export async function SolidAuthHandler(request: NextRequest, prefix: string, authOptions: SolidAuthConfig) {
+  const url = new URL(request.url);
+  const action = url.pathname.slice(prefix.length + 1).split("/")[0] as AuthAction;
 
-    if (!actions.includes(action) || !url.pathname.startsWith(prefix + "/")) {
-      return;
+  if (!actions.includes(action) || !url.pathname.startsWith(prefix + "/")) {
+    return;
+  }
+
+  const res = await Auth(request, authOptions);
+  if (["callback", "signin", "signout"].includes(action)) {
+    const parsedCookie = getSetCookieCallback(res.clone().headers.get("Set-Cookie"));
+    if (parsedCookie) {
+      res.headers.set("Set-Cookie", serialize(parsedCookie.name, parsedCookie.value, parsedCookie as any));
     }
-
-    const res = await Auth(request, authOptions);
-    if (["callback", "signin", "signout"].includes(action)) {
-      const parsedCookie = getSetCookieCallback(res.clone().headers.get("Set-Cookie"));
-      if (parsedCookie) {
-        res.headers.set("Set-Cookie", serialize(parsedCookie.name, parsedCookie.value, parsedCookie as any));
-      }
-    }
-    return res;
-  };
-}
-
-export function SolidAuth(config: SolidAuthConfig) {
-  const { prefix = "/api/auth", ...authOptions } = config;
-  authOptions.secret ??= process.env.AUTH_SECRET;
-  authOptions.trustHost ??= !!(
-    process.env.AUTH_TRUST_HOST ??
-    process.env.VERCEL ??
-    process.env.NODE_ENV !== "production"
-  );
-  const handler = SolidAuthHandler(prefix, authOptions);
-  return {
-    async GET(event: any) {
-      return await handler(event);
-    },
-    async POST(event: any) {
-      return await handler(event);
-    },
-  };
+  }
+  return res;
 }
 
 export async function getSession(req: Request, options: AuthConfig): Promise<Session | null> {

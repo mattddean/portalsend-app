@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import superjson from "superjson";
 import { createContext } from "~/server/context";
 import { appRouter } from "~/server/routers/_app";
@@ -10,7 +11,7 @@ export const rsc = createTRPCNextLayout({
   createContext() {
     return createContext({
       type: "rsc",
-      getUser: createGetUser(),
+      getUser: createGetUser(cookies()),
     });
   },
 });
