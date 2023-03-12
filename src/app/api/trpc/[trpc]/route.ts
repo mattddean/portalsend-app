@@ -8,29 +8,31 @@ import { createGetUser } from "~/shared/server-rsc/get-user";
 export const runtime = "edge";
 
 const handler = (request: NextRequest) => {
-  // const req = new Request(request.url, {
-  //   headers: request.headers,
-  //   cache: request.cache,
-  //   credentials: request.credentials,
-  //   integrity: request.integrity,
-  //   keepalive: request.keepalive,
-  //   method: request.method,
-  //   mode: request.mode,
-  //   redirect: request.redirect,
-  //   referrer: request.referrer,
-  //   referrerPolicy: request.referrerPolicy,
-  //   signal: request.signal,
-  //   body: request.body,
-  // });
+  const req = new Request(request.url, {
+    headers: request.headers,
+    cache: request.cache,
+    credentials: request.credentials,
+    integrity: request.integrity,
+    keepalive: request.keepalive,
+    method: request.method,
+    mode: request.mode,
+    redirect: request.redirect,
+    referrer: request.referrer,
+    referrerPolicy: request.referrerPolicy,
+    signal: request.signal,
+    body: request.body,
+  });
+
+  const asyncStorageCookies = cookies();
 
   return fetchRequestHandler({
     endpoint: "/api/trpc",
-    req: new Request(request),
+    req,
     router: appRouter,
     createContext(opts) {
       return createContext({
         type: "api",
-        getUser: createGetUser(cookies()),
+        getUser: createGetUser(asyncStorageCookies),
         ...opts,
       });
     },
