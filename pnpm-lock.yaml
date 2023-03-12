@@ -1,12 +1,15 @@
 lockfileVersion: 5.4
 
 patchedDependencies:
+  '@auth/core@0.5.1':
+    hash: yd3z5zgmwqcl7buxsppawwdzea
+    path: patches/@auth__core@0.5.1.patch
   '@tanstack/react-query@4.26.1':
     hash: ofxwhsft6yhbqzmuaz6xnxhbqi
     path: patches/@tanstack__react-query@4.26.1.patch
 
 specifiers:
-  '@auth/core': 0.0.0-a775c46b1
+  '@auth/core': 0.5.1
   '@aws-sdk/client-s3': ^3.289.0
   '@aws-sdk/middleware-endpoint': ^3.289.0
   '@aws-sdk/s3-presigned-post': ^3.289.0
@@ -90,7 +93,7 @@ specifiers:
   zod: ^3.21.4
 
 dependencies:
-  '@auth/core': 0.0.0-a775c46b1
+  '@auth/core': 0.5.1_yd3z5zgmwqcl7buxsppawwdzea
   '@aws-sdk/client-s3': 3.289.0
   '@aws-sdk/middleware-endpoint': 3.289.0
   '@aws-sdk/s3-presigned-post': 3.289.0
@@ -185,8 +188,8 @@ packages:
       '@jridgewell/trace-mapping': 0.3.17
     dev: true
 
-  /@auth/core/0.0.0-a775c46b1:
-    resolution: {integrity: sha512-FhPl+mI5dkoCmDI77M6Q/R68kr6BoQaYvnDatoDcmY6P+jO71n9MEgVHeGNTDSGneID1bCnyrzRwonIFdYkqUw==}
+  /@auth/core/0.5.1_yd3z5zgmwqcl7buxsppawwdzea:
+    resolution: {integrity: sha512-t9z8F7dkuVceKWBmMy1fd2t6H+vfRju/YJ1lm+6RnJ7pNEvX5qMR874wg0+cYbWvyZazLi8fFK/FA6I3D5sSkA==}
     peerDependencies:
       nodemailer: ^6.8.0
     peerDependenciesMeta:
@@ -200,6 +203,7 @@ packages:
       preact: 10.11.3
       preact-render-to-string: 5.2.3_preact@10.11.3
     dev: false
+    patched: true
 
   /@aws-crypto/crc32/3.0.0:
     resolution: {integrity: sha512-IzSgsrxUcsrejQbPVilIKy16kAT52EwB6zSaI+M3xxIhKh5+aldEyvI+z6erM7TCLB2BJsFrtHjp6/4/sr+3dA==}
@@ -7253,7 +7257,7 @@ packages:
       '@types/glob': 7.2.0
       array-union: 2.1.0
       dir-glob: 3.0.1
-      fast-glob: 3.2.11
+      fast-glob: 3.2.12
       glob: 7.2.3
       ignore: 5.2.4
       merge2: 1.4.1

@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import { authConfig } from "~/auth/options";
 import { SolidAuthHandler } from "~/auth/server";
 
@@ -16,15 +16,17 @@ async function handler(request: NextRequest) {
 
   // const heads = headers();
 
-  // const theHeaders: Record<string, string> = {};
+  // const theHeaders = [];
   // heads.forEach((value, key) => {
-  //   theHeaders[key] = value;
+  //   theHeaders.push();
   // });
-  // const newHeaders = new Headers(request.headers);
+  // const newHeaders = new Headers(Object.fromEntries(request.headers.entries()));
 
-  // const req = new Request({
+  // Object.fromEntries(heads);
+
+  // const req = new NextRequest({
   //   url: request.url,
-  //   headers: newHeaders,
+  //   headers: heads,
   //   cache: request.cache,
   //   credentials: request.credentials,
   //   destination: request.destination,
@@ -46,10 +48,9 @@ async function handler(request: NextRequest) {
   //   text: request.text,
   // });
 
-  const newReq = request.clone();
+  // console.debug("req.url", req.url);
 
-  // console.debug("heads", heads);
-  // console.debug("req.headers", req.headers);
+  // const newReq = request.clone();
 
   // console.debug("\nbreak here");
   // console.debug("content type", heads.get("Content-Type"));
@@ -64,7 +65,7 @@ async function handler(request: NextRequest) {
   // console.debug("content type", newReq.headers.get("Content-Type"));
   // console.debug("accept", newReq.headers.get("Accept"));
 
-  const response = await SolidAuthHandler(newReq, prefix, authOptions);
+  const response = await SolidAuthHandler(request, prefix, authOptions);
   return response;
 }
 
