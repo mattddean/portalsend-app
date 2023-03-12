@@ -17,7 +17,7 @@ export function createGetUser(cookies: RequestCookies | ReadonlyRequestCookies) 
       return cookiesObj;
     }, {} as Record<string, string>);
 
-    const sessionToken = newCookies["next-auth.session-token"];
+    const sessionToken = newCookies["next-auth.session-token"] ?? newCookies["__Secure-next-auth.session-token"];
     if (!sessionToken) return null;
 
     const session = await db
