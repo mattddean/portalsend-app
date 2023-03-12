@@ -1,9 +1,6 @@
 lockfileVersion: 5.4
 
 patchedDependencies:
-  '@auth/core@0.5.1':
-    hash: yd3z5zgmwqcl7buxsppawwdzea
-    path: patches/@auth__core@0.5.1.patch
   '@tanstack/react-query@4.26.1':
     hash: ofxwhsft6yhbqzmuaz6xnxhbqi
     path: patches/@tanstack__react-query@4.26.1.patch
@@ -93,7 +90,7 @@ specifiers:
   zod: ^3.21.4
 
 dependencies:
-  '@auth/core': 0.5.1_yd3z5zgmwqcl7buxsppawwdzea
+  '@auth/core': 0.5.1
   '@aws-sdk/client-s3': 3.289.0
   '@aws-sdk/middleware-endpoint': 3.289.0
   '@aws-sdk/s3-presigned-post': 3.289.0
@@ -188,7 +185,7 @@ packages:
       '@jridgewell/trace-mapping': 0.3.17
     dev: true
 
-  /@auth/core/0.5.1_yd3z5zgmwqcl7buxsppawwdzea:
+  /@auth/core/0.5.1:
     resolution: {integrity: sha512-t9z8F7dkuVceKWBmMy1fd2t6H+vfRju/YJ1lm+6RnJ7pNEvX5qMR874wg0+cYbWvyZazLi8fFK/FA6I3D5sSkA==}
     peerDependencies:
       nodemailer: ^6.8.0
@@ -203,7 +200,6 @@ packages:
       preact: 10.11.3
       preact-render-to-string: 5.2.3_preact@10.11.3
     dev: false
-    patched: true
 
   /@aws-crypto/crc32/3.0.0:
     resolution: {integrity: sha512-IzSgsrxUcsrejQbPVilIKy16kAT52EwB6zSaI+M3xxIhKh5+aldEyvI+z6erM7TCLB2BJsFrtHjp6/4/sr+3dA==}
