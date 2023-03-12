@@ -28,9 +28,9 @@ export function createGetUser(cookies: RequestCookies | ReadonlyRequestCookies) 
     if (!session) return null;
 
     const user: User = {
-      id: "cldqvd9bf0000wnx224sgogbo",
-      name: "mattddean",
-      email: "mdean400@gmail.com",
+      id: session.user_id,
+      name: session.user_name ?? undefined,
+      email: session.user_email,
     };
     return user;
   };
