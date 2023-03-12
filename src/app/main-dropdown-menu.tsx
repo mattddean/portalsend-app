@@ -18,7 +18,7 @@ import {
 
 export interface Props {
   avatarFallbackText?: string;
-  user: { email?: string | null | undefined };
+  user: { email?: string | undefined; image: string | undefined };
 }
 
 export const MainDropdownMenu: FC<Props> = ({ user, avatarFallbackText }) => {
@@ -27,8 +27,7 @@ export const MainDropdownMenu: FC<Props> = ({ user, avatarFallbackText }) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
-            {/* TODO */}
-            <AvatarImage src={"https://avatars.githubusercontent.com/u/29106809?v=4" ?? undefined} alt="User avatar" />
+            <AvatarImage src={user.image} alt="User avatar" />
             {avatarFallbackText && <AvatarFallback>{avatarFallbackText}</AvatarFallback>}
           </Avatar>
         </Button>
