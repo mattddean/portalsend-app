@@ -7,7 +7,11 @@ import { Label } from "~/components/ui/label";
 import { arrayBufferToString, encryptRsaPrivateKey, generateRsaKeyPair, serializeKey } from "~/lib/key-utils";
 import { api } from "~/trpc/client/trpc-client";
 
-export const ResetPasswordForm: FC = () => {
+export interface Props {
+  email: string;
+}
+
+export const ResetPasswordForm: FC<Props> = ({ email }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmationPassword, setConfirmationPassword] = useState("");
 
@@ -38,7 +42,7 @@ export const ResetPasswordForm: FC = () => {
   return (
     <form className="flex flex-col gap-4" onSubmit={submitChangePassword}>
       {/* hidden username field to make chrome and password managers happy */}
-      <input hidden type="text" name="email" autoComplete="email" />
+      <input id="email" hidden type="text" value={email} autoComplete="email" />
 
       <div className="flex justify-between">
         <div className="flex w-full flex-col gap-2">
