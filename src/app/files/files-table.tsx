@@ -10,7 +10,7 @@ import {
 import { inferRouterOutputs } from "@trpc/server";
 import { format } from "date-fns";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type FC } from "react";
+import { useMemo, useState, type FC } from "react";
 import { arrayBufferToString, decryptFilename, stringToUint8Array } from "~/lib/key-utils";
 import type { AppRouter } from "~/server/routers/_app";
 import { api } from "~/trpc/client/trpc-client";
@@ -88,14 +88,6 @@ export interface Props {
   initialPageSize: number;
 }
 
-function useRenderCount() {
-  const ref = useRef(0);
-  useEffect(() => {
-    ref.current++;
-  });
-  return ref.current;
-}
-
 /** @todo option to sort ascending by time and ability to search, once the user has decrypted the file names */
 export const FilesTable: FC<Props> = ({
   onlySentReceived,
@@ -106,7 +98,7 @@ export const FilesTable: FC<Props> = ({
 }) => {
   // Dehydrate data that we fetched on the server in server components higher up the tree
   const queryClient = useQueryClient();
-  console.log(`hydrated client (render #${useRenderCount()})`, dehydrate(queryClient));
+  dehydrate(queryClient);
 
   const columns = useMemo<ColumnDef<Row>[]>(
     () => [
