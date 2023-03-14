@@ -2,6 +2,11 @@ import { NextPage } from "next";
 
 export const runtime = "edge";
 
+export const metadata = {
+  title: "Privacy",
+  description: "Privacy notices.",
+};
+
 const Privacy: NextPage = () => {
   return (
     <>

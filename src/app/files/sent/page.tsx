@@ -6,6 +6,11 @@ import { InnerPage } from "../inner-page";
 
 export const runtime = "edge";
 
+export const metadata = {
+  title: "Sent Files",
+  description: "Your sent files.",
+};
+
 /* @ts-expect-error Async Server Component */
 const Page: FC = async () => {
   const pageSizes: [number, number, number] = [10, 25, 50];

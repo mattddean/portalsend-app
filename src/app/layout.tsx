@@ -24,6 +24,7 @@ export const metadata = {
     default: "Portalsend",
     template: "%s | Portalsend",
   },
+  description: "Dead simple end-to-end encrypted file sharing for everyone.",
 };
 
 export default async function RootLayout(props: PropsWithChildren) {

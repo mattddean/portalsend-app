@@ -6,6 +6,11 @@ import { ResetPasswordForm } from "./reset-password-form";
 
 export const runtime = "edge";
 
+export const metadata = {
+  title: "Profile",
+  description: "Your profile.",
+};
+
 /* @ts-expect-error Async Server Component */
 const Home: NextPage = async () => {
   const user = await rsc.whoami.fetch();
