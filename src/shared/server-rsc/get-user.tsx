@@ -20,6 +20,8 @@ export function createGetUser(cookies: RequestCookies | ReadonlyRequestCookies) 
     const sessionToken = newCookies["next-auth.session-token"] ?? newCookies["__Secure-next-auth.session-token"];
     if (!sessionToken) return null;
 
+    console.debug("getting user");
+
     const session = await db
       .selectFrom("Session")
       .innerJoin("User", "User.id", "Session.userId")

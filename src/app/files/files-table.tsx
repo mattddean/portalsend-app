@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { dehydrate, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ColumnDef,
   flexRender,
@@ -10,14 +10,14 @@ import {
 import { inferRouterOutputs } from "@trpc/server";
 import { format } from "date-fns";
 import Link from "next/link";
-import { useMemo, useState, type FC } from "react";
+import { useEffect, useMemo, useRef, useState, type FC } from "react";
 import { arrayBufferToString, decryptFilename, stringToUint8Array } from "~/lib/key-utils";
 import type { AppRouter } from "~/server/routers/_app";
 import { api } from "~/trpc/client/trpc-client";
-import { ChevronLeftIcon, ChevronRightIcon, SpinnerIcon, UnlockIcon } from "../icons";
-import { Button } from "../ui/button";
-import { cn } from "../ui/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { ChevronLeftIcon, ChevronRightIcon, SpinnerIcon, UnlockIcon } from "../../components/icons";
+import { Button } from "../../components/ui/button";
+import { cn } from "../../components/ui/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 
 interface Row {
   filename: string;
@@ -84,10 +84,30 @@ export interface Props {
   rsaPrivateKey: CryptoKey | undefined;
   onlySentReceived?: "sent" | "received";
   onClickDecryptFilenames: () => unknown | Promise<unknown>;
+  pageSizes: number[];
+  initialPageSize: number;
 }
 
-/** @todo option to sort ascending by time and ability to search */
-export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClickDecryptFilenames }) => {
+function useRenderCount() {
+  const ref = useRef(0);
+  useEffect(() => {
+    ref.current++;
+  });
+  return ref.current;
+}
+
+/** @todo option to sort ascending by time and ability to search, once the user has decrypted the file names */
+export const FilesTable: FC<Props> = ({
+  onlySentReceived,
+  rsaPrivateKey,
+  onClickDecryptFilenames,
+  pageSizes,
+  initialPageSize,
+}) => {
+  // Dehydrate data that we fetched on the server in server components higher up the tree
+  const queryClient = useQueryClient();
+  console.log(`hydrated client (render #${useRenderCount()})`, dehydrate(queryClient));
+
   const columns = useMemo<ColumnDef<Row>[]>(
     () => [
       {
@@ -108,11 +128,9 @@ export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClick
     [],
   );
 
-  const pageSizes: [number, number, number] = [10, 25, 50];
-
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: pageSizes[0],
+    pageSize: initialPageSize,
   });
 
   const fetchDataOptions = {

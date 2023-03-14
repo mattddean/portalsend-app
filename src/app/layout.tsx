@@ -5,7 +5,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { PropsWithChildren } from "react";
 import { LogoIcon } from "~/components/icons";
-import { MainNav } from "~/components/main-nav";
+import { MainNav } from "~/components/main-nav/main-nav";
 import { MobileNav } from "~/components/mobile-nav";
 import { ThemeProvider } from "~/components/theme-provider";
 import { cn } from "~/components/ui/lib/utils";

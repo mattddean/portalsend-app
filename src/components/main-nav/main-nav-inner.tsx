@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { forwardRef } from "react";
+import { FC, forwardRef } from "react";
+import { LogoIcon } from "~/components/icons";
+import { cn } from "~/components/ui/lib/utils";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -11,9 +13,6 @@ import {
   NavigationMenuTrigger,
 } from "~/components/ui/navigation-menu";
 import { siteConfig } from "~/config/site";
-import { api } from "../trpc/client/trpc-client";
-import { LogoIcon } from "./icons";
-import { cn } from "./ui/lib/utils";
 
 const ListItem = forwardRef<React.ElementRef<typeof Link>, React.ComponentPropsWithoutRef<typeof Link>>(
   ({ className, title, children, href, ...props }, _ref) => {
@@ -37,12 +36,10 @@ const ListItem = forwardRef<React.ElementRef<typeof Link>, React.ComponentPropsW
 ListItem.displayName = "ListItem";
 
 export interface Props {
-  signedIn: boolean;
+  user: boolean;
 }
 
-export function MainNav() {
-  const userQuery = api.auth.getSession.useQuery();
-
+export const MainNavInner: FC<Props> = ({ user }) => {
   return (
     <div className="hidden md:flex">
       <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -51,7 +48,7 @@ export function MainNav() {
       </Link>
       <NavigationMenu>
         <NavigationMenuList>
-          {!!userQuery.data?.user && (
+          {user && (
             <NavigationMenuItem>
               <NavigationMenuTrigger className="h-9">Files</NavigationMenuTrigger>
               <NavigationMenuContent>
@@ -81,4 +78,4 @@ export function MainNav() {
       </NavigationMenu>
     </div>
   );
-}
+};

@@ -1,9 +1,9 @@
 lockfileVersion: 5.4
 
 patchedDependencies:
-  '@tanstack/react-query@4.26.1':
+  '@tanstack/react-query@4.14.5':
     hash: ofxwhsft6yhbqzmuaz6xnxhbqi
-    path: patches/@tanstack__react-query@4.26.1.patch
+    path: patches/@tanstack__react-query@4.14.5.patch
 
 specifiers:
   '@auth/core': 0.5.1
@@ -37,12 +37,13 @@ specifiers:
   '@tailwindcss/forms': ^0.5.3
   '@tailwindcss/line-clamp': ^0.4.2
   '@tailwindcss/typography': ^0.5.9
-  '@tanstack/query-core': ^4.14.5
-  '@tanstack/react-query': ^4.14.5
+  '@tanstack/query-core': 4.14.5
+  '@tanstack/react-query': 4.14.5
+  '@tanstack/react-query-devtools': 4.26.1
   '@tanstack/react-table': ^8.7.9
-  '@trpc/client': ^10.15.0
-  '@trpc/react-query': ^10.15.0
-  '@trpc/server': ^10.15.0
+  '@trpc/client': 10.0.0-rc.1
+  '@trpc/react-query': 10.0.0-rc.1
+  '@trpc/server': 10.0.0-rc.1
   '@types/cookie': ^0.5.1
   '@types/node': 18.8.5
   '@types/react': 18.0.21
@@ -118,12 +119,13 @@ dependencies:
   '@radix-ui/react-tooltip': 1.0.5_rj7ozvcq3uehdlnj3cbwzbi5ce
   '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.2.7
   '@tailwindcss/typography': 0.5.9_tailwindcss@3.2.7
-  '@tanstack/query-core': 4.26.1
-  '@tanstack/react-query': 4.26.1_ofxwhsft6yhbqzmuaz6xnxhbqi_biqbaboplfbrettd7655fr4n2y
+  '@tanstack/query-core': 4.14.5
+  '@tanstack/react-query': 4.14.5_ofxwhsft6yhbqzmuaz6xnxhbqi_biqbaboplfbrettd7655fr4n2y
+  '@tanstack/react-query-devtools': 4.26.1_gyxsqtja23hdhagyzodcyyjlny
   '@tanstack/react-table': 8.7.9_biqbaboplfbrettd7655fr4n2y
-  '@trpc/client': 10.15.0_@trpc+server@10.15.0
-  '@trpc/react-query': 10.15.0_7cicpoc2aivmas2bivo4obksf4
-  '@trpc/server': 10.15.0
+  '@trpc/client': 10.0.0-rc.1_@trpc+server@10.0.0-rc.1
+  '@trpc/react-query': 10.0.0-rc.1_sjvzxmzxwt2uy7f4vuidgcypbi
+  '@trpc/server': 10.0.0-rc.1
   buffer: 6.0.3
   class-variance-authority: 0.4.0_typescript@4.8.4
   clsx: 1.2.1
@@ -4140,12 +4142,34 @@ packages:
       tailwindcss: 3.2.7_postcss@8.4.21
     dev: false
 
-  /@tanstack/query-core/4.26.1:
-    resolution: {integrity: sha512-Zrx2pVQUP4ndnsu6+K/m8zerXSVY8QM+YSbxA1/jbBY21GeCd5oKfYl92oXPK0hPEUtoNuunIdiq0ZMqLos+Zg==}
+  /@tanstack/match-sorter-utils/8.7.6:
+    resolution: {integrity: sha512-2AMpRiA6QivHOUiBpQAVxjiHAA68Ei23ZUMNaRJrN6omWiSFLoYrxGcT6BXtuzp0Jw4h6HZCmGGIM/gbwebO2A==}
+    engines: {node: '>=12'}
+    dependencies:
+      remove-accents: 0.4.2
     dev: false
 
-  /@tanstack/react-query/4.26.1_ofxwhsft6yhbqzmuaz6xnxhbqi_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-i3dnz4TOARGIXrXQ5P7S25Zfi4noii/bxhcwPurh2nrf5EUCcAt/95TB2HSmMweUBx206yIMWUMEQ7ptd6zwDg==}
+  /@tanstack/query-core/4.14.5:
+    resolution: {integrity: sha512-Su1AyrPb6xnm7wXTvpN5tt+B7LViYSh9k04vvuc6+eMVH0HkE9ktZTXibRrTvV83BI1KP5MG7v/k90ne/4zQzw==}
+    dev: false
+
+  /@tanstack/react-query-devtools/4.26.1_gyxsqtja23hdhagyzodcyyjlny:
+    resolution: {integrity: sha512-ts2mA+fyFYFRi3Cee4xBk8Fx6waSFOM+yCkFqwJfGQRGjjTIMYMZPJv4wkv7vy12IVi1SYhL8au22LRKlXS1Zg==}
+    peerDependencies:
+      '@tanstack/react-query': 4.26.1
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@tanstack/match-sorter-utils': 8.7.6
+      '@tanstack/react-query': 4.14.5_ofxwhsft6yhbqzmuaz6xnxhbqi_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      superjson: 1.12.2
+      use-sync-external-store: 1.2.0_react@18.2.0
+    dev: false
+
+  /@tanstack/react-query/4.14.5_ofxwhsft6yhbqzmuaz6xnxhbqi_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-CuWl/SxSB0zHhHaTja8LNhy9Vdk+vk9IkW3Oiq3lo4gPnTguHmbUzfjEA1x3RfvPeHfPMuq/pYMSbV+CX4aDQA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -4156,7 +4180,7 @@ packages:
       react-native:
         optional: true
     dependencies:
-      '@tanstack/query-core': 4.26.1
+      '@tanstack/query-core': 4.14.5
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
@@ -4185,32 +4209,32 @@ packages:
     engines: {node: '>= 6'}
     dev: true
 
-  /@trpc/client/10.15.0_@trpc+server@10.15.0:
-    resolution: {integrity: sha512-Tmm3N7jibEOZTsvHRU+tWCVvUf8F9/UcKOVTGAWuyasBpnjOZ7ClZ81F9wo4cg9+9tUxUhuJns+E96/HtATpyQ==}
+  /@trpc/client/10.0.0-rc.1_@trpc+server@10.0.0-rc.1:
+    resolution: {integrity: sha512-7tNq2Oopn1v+R2aGDsulpuCi2MODf8MOtBENOMg8gKnWpw8O6+UPApLJLbMKJJ45qWLg/4jSvpi4kHAYsXTzzA==}
     peerDependencies:
-      '@trpc/server': 10.15.0
+      '@trpc/server': 10.0.0-rc.1
     dependencies:
-      '@trpc/server': 10.15.0
+      '@trpc/server': 10.0.0-rc.1
     dev: false
 
-  /@trpc/react-query/10.15.0_7cicpoc2aivmas2bivo4obksf4:
-    resolution: {integrity: sha512-MD8JBoviAioI3ssOzN+Uxd8uGvhgfqvtbmkdhYQkQJOBlQw+4A55BfeXykeRmIHOs6X83iiqZVVerximEzTADQ==}
+  /@trpc/react-query/10.0.0-rc.1_sjvzxmzxwt2uy7f4vuidgcypbi:
+    resolution: {integrity: sha512-c+6ivv5H4pvOzsCPIxKp78hWoA4KI37mIdhiVMcIs7F8pgimG2RNzSxLLMw8PNLaBHDsRmOctIgr4sAHMqRrmQ==}
     peerDependencies:
       '@tanstack/react-query': ^4.3.8
-      '@trpc/client': 10.15.0
-      '@trpc/server': 10.15.0
+      '@trpc/client': 10.0.0-rc.1
+      '@trpc/server': 10.0.0-rc.1
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@tanstack/react-query': 4.26.1_ofxwhsft6yhbqzmuaz6xnxhbqi_biqbaboplfbrettd7655fr4n2y
-      '@trpc/client': 10.15.0_@trpc+server@10.15.0
-      '@trpc/server': 10.15.0
+      '@tanstack/react-query': 4.14.5_ofxwhsft6yhbqzmuaz6xnxhbqi_biqbaboplfbrettd7655fr4n2y
+      '@trpc/client': 10.0.0-rc.1_@trpc+server@10.0.0-rc.1
+      '@trpc/server': 10.0.0-rc.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@trpc/server/10.15.0:
-    resolution: {integrity: sha512-Kf+wTU5iZjjjEzqZDy+o5wc4nEZKvE0yWdF9qZa72xLu6eTJ0BS2hnwQZeCZ2pIbmQb8/6lFr5igHiY4/dy0mA==}
+  /@trpc/server/10.0.0-rc.1:
+    resolution: {integrity: sha512-AqbGhlDVEs5ziDDuvBpXpDiUd2FzK9rS4frfA0pdYfpuhH/AoJoot8vHGENLHzyssS06/HTUGeFr/n8oCKW9DA==}
     dev: false
 
   /@ts-morph/common/0.11.1:
@@ -9947,6 +9971,10 @@ packages:
       mdast-util-to-hast: 11.3.0
       unified: 10.1.2
     dev: true
+
+  /remove-accents/0.4.2:
+    resolution: {integrity: sha512-7pXIJqJOq5tFgG1A2Zxti3Ht8jJF337m4sowbuHsW30ZnkQFnDzy9qBNhgzX8ZLW4+UBcXiiR7SwR6pokHsxiA==}
+    dev: false
 
   /require-from-string/2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}

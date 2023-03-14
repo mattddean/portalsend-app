@@ -8,15 +8,15 @@ export const runtime = "edge";
 
 /* @ts-expect-error Async Server Component */
 const Home: NextPage = async () => {
-  const session = await rsc.auth.getSession.fetch();
+  const user = await rsc.whoami.fetch();
 
   return (
     <>
       <div className="h-12" />
 
-      {!session?.user && <SignInButtons />}
+      {!user && <SignInButtons />}
 
-      {!!session?.user && (
+      {!!user && (
         <div className="flex w-full max-w-[500px] flex-col gap-8">
           <div id="account-info">
             <h2 className="pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
@@ -26,11 +26,11 @@ const Home: NextPage = async () => {
             <div className="flex flex-col rounded border border-slate-600 bg-slate-900">
               <div className="flex justify-between border-b-2 border-b-slate-800 p-4">
                 <div>Username</div>
-                <div>{session?.user.name}</div>
+                <div>{user.name}</div>
               </div>
               <div className="flex justify-between p-4">
                 <div>Email</div>
-                <div>{session?.user.email}</div>
+                <div>{user.email}</div>
               </div>
             </div>
           </div>
@@ -46,7 +46,7 @@ const Home: NextPage = async () => {
               </div>
             </div>
 
-            <ResetPasswordForm />
+            <ResetPasswordForm email={user.email} />
           </div>
         </div>
       )}
