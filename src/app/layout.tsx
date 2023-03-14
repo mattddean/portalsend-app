@@ -31,7 +31,8 @@ export default async function RootLayout(props: PropsWithChildren) {
 
   const avatarFallbackText = (() => {
     const userName = user?.name;
-    return userName?.[0];
+    const firstLetterOfUsername = userName?.[0];
+    return firstLetterOfUsername?.toUpperCase();
   })();
 
   return (
