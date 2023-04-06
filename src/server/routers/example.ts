@@ -7,8 +7,11 @@ import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { createId } from "@paralleldrive/cuid2";
 import { TRPCError } from "@trpc/server";
+import { desc, eq, inArray, lte } from "drizzle-orm/expressions";
+import { sql } from "drizzle-orm/sql";
 import { z } from "zod";
-import { db } from "~/lib/kysely-db";
+import { db } from "~/db/drizzle-db";
+import * as Schema from "~/db/schema";
 import { privateProcedure, publicProcedure, router } from "../trpc";
 
 const portalsendFilesS3Bucket = "portalsend-app-files";
@@ -54,15 +57,14 @@ export const exampleRouter = router({
       }
 
       await db
-        .updateTable("User")
-        .where("email", "=", authenticatedEmail)
+        .update(Schema.users)
         .set({
           public_key: input.publicKey,
           encrypted_private_key: input.encryptedPrivateKey,
           encrypted_private_key_iv: input.encryptedPrivateKeyIv,
           encrypted_private_key_salt: input.encryptedPrivateKeySalt,
         })
-        .execute();
+        .where(eq(Schema.users.email, authenticatedEmail));
     }),
 
   getMyKeys: privateProcedure.query(async ({ ctx }) => {
@@ -71,11 +73,16 @@ export const exampleRouter = router({
       throw new Error("User does not have an email address set");
     }
 
-    const user = await db
-      .selectFrom("User")
-      .select(["encrypted_private_key", "encrypted_private_key_iv", "encrypted_private_key_salt", "public_key"])
-      .where("User.email", "=", authenticatedEmail)
-      .executeTakeFirst();
+    const [user] = await db
+      .select({
+        encrypted_private_key: Schema.users.encrypted_private_key,
+        encrypted_private_key_iv: Schema.users.encrypted_private_key_iv,
+        encrypted_private_key_salt: Schema.users.encrypted_private_key_salt,
+        public_key: Schema.users.public_key,
+      })
+      .from(Schema.users)
+      .where(eq(Schema.users.email, authenticatedEmail))
+      .limit(1);
 
     if (!user?.encrypted_private_key || !user?.encrypted_private_key_iv || !user?.encrypted_private_key_salt) {
       throw new TRPCError({
@@ -96,10 +103,12 @@ export const exampleRouter = router({
     .input(z.object({ user_emails: z.array(z.string()) }))
     .mutation(async ({ input }) => {
       const users = await db
-        .selectFrom("User")
-        .select(["email", "public_key"])
-        .where("email", "in", input.user_emails)
-        .execute();
+        .select({
+          email: Schema.users.email,
+          public_key: Schema.users.public_key,
+        })
+        .from(Schema.users)
+        .where(inArray(Schema.users.email, input.user_emails));
 
       const retUsers = [];
       for (const email of input.user_emails) {
@@ -132,96 +141,67 @@ export const exampleRouter = router({
       if (!userEmail) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
 
       const sharedKeySetId = createId();
-      await db
-        .insertInto("SharedKeySet")
-        .values({ created_at: new Date(), updated_at: new Date(), id: sharedKeySetId })
-        .executeTakeFirstOrThrow();
+
+      await db.insert(Schema.sharedKeySets).values({ id: sharedKeySetId });
 
       for (const encryptedSharedKey of input.encrypted_keys_for_recipients) {
-        const user = await db
-          .selectFrom("User")
-          .select(["id"])
-          .where("email", "=", encryptedSharedKey.email)
-          .executeTakeFirstOrThrow();
+        const [user] = await db
+          .select({ id: Schema.users.id })
+          .from(Schema.users)
+          .where(eq(Schema.users.email, encryptedSharedKey.email))
+          .limit(1);
+        if (!user) throw new Error("User not found");
         const sharedKeyId = createId();
-        await db
-          .insertInto("SharedKey")
-          .values([
-            {
-              encrypted_key: encryptedSharedKey.encrypted_shared_key,
-              shared_key_set_id: sharedKeySetId,
-              id: sharedKeyId,
-              created_at: new Date(),
-              updated_at: new Date(),
-            },
-          ])
-          .executeTakeFirstOrThrow();
-        await db
-          .insertInto("FileAccess")
-          .values([
-            {
-              user_id: user.id,
-              shared_key_id: sharedKeyId,
-              original_sender: false,
-              permission: "VIEWER",
-              id: createId(),
-              created_at: new Date(),
-              updated_at: new Date(),
-            },
-          ])
-          .executeTakeFirstOrThrow();
+        await db.insert(Schema.sharedKeys).values({
+          encrypted_key: encryptedSharedKey.encrypted_shared_key,
+          shared_key_set_id: sharedKeySetId,
+          id: sharedKeyId,
+        });
+        await db.insert(Schema.fileAccesses).values({
+          id: createId(),
+          user_id: user.id,
+          shared_key_id: sharedKeyId,
+          original_sender: false,
+          permission: "VIEWER",
+        });
       }
 
       const sharedKeyId = createId();
-      await db
-        .insertInto("SharedKey")
-        .values([
-          {
-            encrypted_key: input.encrypted_key_for_self,
-            shared_key_set_id: sharedKeySetId,
-            id: sharedKeyId,
-            created_at: new Date(),
-            updated_at: new Date(),
-          },
-        ])
-        .executeTakeFirstOrThrow();
+      await db.insert(Schema.sharedKeys).values({
+        encrypted_key: input.encrypted_key_for_self,
+        shared_key_set_id: sharedKeySetId,
+        id: sharedKeyId,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
 
-      await db
-        .insertInto("FileAccess")
-        .values([
-          {
-            user_id: ctx.user.id,
-            shared_key_id: sharedKeyId,
-            original_sender: true,
-            permission: "OWNER",
-            id: createId(),
-            created_at: new Date(),
-            updated_at: new Date(),
-          },
-        ])
-        .executeTakeFirstOrThrow();
+      await db.insert(Schema.fileAccesses).values({
+        user_id: ctx.user.id,
+        shared_key_id: sharedKeyId,
+        original_sender: true,
+        permission: "OWNER",
+        id: createId(),
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
 
       const fileId = createId();
-      await db
-        .insertInto("File")
-        .values([
-          {
-            iv: input.file_iv,
-            encrypted_name: input.encrypted_filename,
-            shared_key_set_id: sharedKeySetId,
-            created_at: new Date(),
-            updated_at: new Date(),
-            id: fileId,
-            slug: createId(),
-            storage_key: createId(),
-          },
-        ])
-        .executeTakeFirstOrThrow();
-      const file = await db
-        .selectFrom("File")
-        .select(["id", "storage_key", "slug"])
-        .where("id", "=", fileId)
-        .executeTakeFirstOrThrow();
+      await db.insert(Schema.files).values({
+        iv: input.file_iv,
+        encrypted_name: input.encrypted_filename,
+        shared_key_set_id: sharedKeySetId,
+        created_at: new Date(),
+        updated_at: new Date(),
+        id: fileId,
+        slug: createId(),
+        storage_key: createId(),
+      });
+      const [file] = await db
+        .select({ id: Schema.files.id, storage_key: Schema.files.storage_key, slug: Schema.files.id })
+        .from(Schema.files)
+        .where(eq(Schema.files.id, fileId))
+        .limit(1);
+      if (!file) throw new Error(`File with id ${fileId} not found`);
 
       // Add a one megabyte buffer in case the encrypted version of the file is a bit longer than the unencrypted version.
       const maxFileSizeBytes = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_BYTES as string) + 1_000_000;
@@ -246,21 +226,23 @@ export const exampleRouter = router({
     }),
 
   getFile: privateProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
-    const file = await db
-      .selectFrom("FileAccess")
-      .where("FileAccess.user_id", "=", ctx.user.id)
-      .innerJoin("SharedKey", "SharedKey.id", "FileAccess.shared_key_id")
-      .innerJoin("SharedKeySet", "SharedKeySet.id", "SharedKey.shared_key_set_id")
-      .innerJoin("File", "File.shared_key_set_id", "SharedKeySet.id")
-      .where("File.slug", "=", input.slug)
-      .select(["SharedKey.encrypted_key", "File.iv", "File.name"])
-      .executeTakeFirst();
+    const [file] = await db
+      .select({
+        encrypted_key: Schema.sharedKeys.encrypted_key,
+        iv: Schema.files.iv,
+      })
+      .from(Schema.fileAccesses)
+      .where(eq(Schema.files.slug, input.slug))
+      .where(eq(Schema.fileAccesses.user_id, ctx.user.id))
+      .innerJoin(Schema.sharedKeys, eq(Schema.sharedKeys.id, Schema.fileAccesses.shared_key_id))
+      .innerJoin(Schema.sharedKeySets, eq(Schema.sharedKeySets.id, Schema.sharedKeys.shared_key_set_id))
+      .innerJoin(Schema.files, eq(Schema.files.shared_key_set_id, Schema.sharedKeySets.id))
+      .limit(1);
 
     // NOT_FOUND is fine if the file exists but the user doesn't have access to it. This prevents revealing that the file exists.
     if (!file) throw new TRPCError({ code: "NOT_FOUND" });
 
     return {
-      name: file.name,
       slug: input.slug,
       shared_key_encrypted_for_me: file.encrypted_key,
       iv: file.iv,
@@ -268,12 +250,11 @@ export const exampleRouter = router({
   }),
 
   createFileSignedDownloadUrl: privateProcedure.input(z.object({ slug: z.string() })).mutation(async ({ input }) => {
-    const file = await db
-      .selectFrom("File")
-      .select(["storage_key", "name"])
-      .where("slug", "=", input.slug)
-      .executeTakeFirst();
-
+    const [file] = await db
+      .select({ storage_key: Schema.files.storage_key })
+      .from(Schema.files)
+      .where(eq(Schema.files.slug, input.slug))
+      .limit(1);
     if (!file) throw new TRPCError({ code: "NOT_FOUND" });
 
     const client = getS3Client();
@@ -283,7 +264,7 @@ export const exampleRouter = router({
     });
     const url = await getSignedUrl(client, command, { expiresIn: 5 * 60 });
 
-    return { signed_download_url: url, file_name: file.name };
+    return { signed_download_url: url };
   }),
 
   infiniteFiles: privateProcedure
@@ -297,100 +278,38 @@ export const exampleRouter = router({
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 50;
 
-      // const whereInput: Prisma.FileWhereInput = {
-      //   sharedKeySet: {
-      //     sharedKeys: {
-      //       some: {
-      //         fileAccesses: {
-      //           some: {
-      //             userId: ctx.user.id,
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // };
-
-      // // this first if statement is just to help typescript
-      // if (whereInput.sharedKeySet?.sharedKeys?.some?.fileAccesses?.some) {
-      //   if (input.only_sent_received === "sent") {
-      //     whereInput.sharedKeySet.sharedKeys.some.fileAccesses.some.originalSender = true;
-      //   } else if (input.only_sent_received === "received") {
-      //     whereInput.sharedKeySet.sharedKeys.some.fileAccesses.some.originalSender = false;
-      //   }
-      // }
-
-      // TODO: transaction
-      let totalCountQuery = db
-        .selectFrom("FileAccess")
-        .where("FileAccess.user_id", "=", ctx.user.id)
-        .innerJoin("SharedKey", "SharedKey.id", "FileAccess.shared_key_id")
-        .innerJoin("SharedKeySet", "SharedKeySet.id", "SharedKey.shared_key_set_id")
-        .innerJoin("File", "File.shared_key_set_id", "SharedKeySet.id")
-        .select([db.fn.count("FileAccess.id").as("file_count")]);
-
-      if (input.only_sent_received === "sent") {
-        totalCountQuery = totalCountQuery.where("FileAccess.original_sender", "=", true);
-      } else if (input.only_sent_received === "received") {
-        totalCountQuery = totalCountQuery.where("FileAccess.original_sender", "=", false);
-      }
-
-      const totalCountResult = await totalCountQuery.execute();
-      const totalCount = totalCountResult[0].file_count;
+      let countRows = await db
+        .select({ files_count: sql<number>`count(${Schema.files.id})`.as("files_count") })
+        .from(Schema.fileAccesses)
+        .where(eq(Schema.fileAccesses.user_id, ctx.user.id))
+        .innerJoin(Schema.sharedKeys, eq(Schema.sharedKeys.id, Schema.fileAccesses.shared_key_id))
+        .innerJoin(Schema.sharedKeySets, eq(Schema.sharedKeySets.id, Schema.sharedKeys.shared_key_set_id))
+        .innerJoin(Schema.files, eq(Schema.files.shared_key_set_id, Schema.sharedKeySets.id));
+      const totalCount = countRows[0]?.files_count;
+      if (totalCount === undefined) throw new Error("Failed to query total file count");
 
       let itemsQuery = db
-        .selectFrom("FileAccess")
-        .where("FileAccess.user_id", "=", ctx.user.id)
-        .innerJoin("SharedKey", "SharedKey.id", "FileAccess.shared_key_id")
-        .innerJoin("SharedKeySet", "SharedKeySet.id", "SharedKey.shared_key_set_id")
-        .innerJoin("File", "File.shared_key_set_id", "SharedKeySet.id")
-        .orderBy("File.created_at", "desc")
-        .select(["File.created_at", "encrypted_key", "encrypted_name", "iv", "File.slug"])
+        .select({
+          created_at: Schema.files.created_at,
+          encrypted_key: Schema.sharedKeys.encrypted_key,
+          encrypted_name: Schema.files.encrypted_name,
+          iv: Schema.files.iv,
+          slug: Schema.files.slug,
+        })
+        .from(Schema.fileAccesses)
+        .where(eq(Schema.fileAccesses.user_id, ctx.user.id))
+        .innerJoin(Schema.sharedKeys, eq(Schema.sharedKeys.id, Schema.fileAccesses.shared_key_id))
+        .innerJoin(Schema.sharedKeySets, eq(Schema.sharedKeySets.id, Schema.sharedKeys.shared_key_set_id))
+        .innerJoin(Schema.files, eq(Schema.files.shared_key_set_id, Schema.sharedKeySets.id))
+        .orderBy(desc(Schema.files.created_at))
         .limit(input.limit);
 
       const cursor = input.cursor;
       if (cursor) {
-        itemsQuery = itemsQuery.where("File.created_at", "<=", cursor);
+        itemsQuery = itemsQuery.where(lte(Schema.files.created_at, cursor));
       }
 
-      const items = await itemsQuery.execute();
-
-      // const [totalCount, items] = await prisma.$transaction([
-      //   // TODO: make a separate endpoint to get totalCount so that we don't have to make this query as often
-      //   prisma.file.count({
-      //     where: whereInput,
-      //   }),
-      //   prisma.file.findMany({
-      //     take: limit + 1, // get an extra item at the end which we'll use as next cursor
-      //     where: whereInput,
-      //     cursor: input.cursor ? { id: input.cursor } : undefined,
-      //     orderBy: { createdAt: "desc" },
-      //     include: {
-      //       sharedKeySet: {
-      //         include: {
-      //           sharedKeys: {
-      //             // where: {
-      //             //   fileAccesses: {
-      //             //     some: {
-      //             //       userId: ctx.session.user.id
-      //             //     },
-      //             //   }
-      //             // },
-      //             include: {
-      //               fileAccesses: {
-      //                 where: {
-      //                   userId: ctx.user.id,
-      //                 },
-      //                 take: 1,
-      //               },
-      //             },
-      //             take: 1,
-      //           },
-      //         },
-      //       },
-      //     },
-      //   }),
-      // ]);
+      const items = await itemsQuery;
 
       let nextCursor: typeof input.cursor | undefined = undefined;
       if (items.length > limit) {
@@ -400,8 +319,7 @@ export const exampleRouter = router({
 
       const returnableItems = items.map((item) => {
         return {
-          // TODO: once this property is required we can remove this assertion
-          encrypted_filename: item.encrypted_name as string,
+          encrypted_filename: item.encrypted_name,
           encrypted_key: item.encrypted_key,
           iv: item.iv,
           created_at: item.created_at,

@@ -270,7 +270,8 @@ const FileSlug: NextPage<Props> = ({ params }) => {
     // Give the user a link to copy the file to their filesystem.
     const decryptedFileUrl = window.URL.createObjectURL(decryptedFile);
     setFileSaveLink(decryptedFileUrl);
-    setFilename(signedUrlResult.file_name as string);
+    // TODO: decrypt filename and use it to save the file.
+    setFilename("TODO.txt");
 
     dispatchProgressTasks({ type: "all_done" });
   };

@@ -1,6 +1,6 @@
 import type { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
 import type { ReadonlyRequestCookies } from "next/dist/server/app-render";
-import { db } from "~/lib/kysely-db";
+import { db } from "~/db/drizzle-db";
 
 export interface User {
   id: string;

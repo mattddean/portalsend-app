@@ -6,6 +6,7 @@
   "words": [
     "codegen",
     "crypographically",
+    "datetime",
     "encrypter",
     "middlewares",
     "nanoids",
@@ -45,7 +46,8 @@
     "trpc",
     "umami",
     "undici",
-    "upstash"
+    "upstash",
+    "usrs"
   ],
   "import": []
 }
