@@ -1,7 +1,11 @@
 // @ts-check
 
+const withMDX = require("@next/mdx")({
+  extension: /\.mdx?$/,
+});
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+module.exports = withMDX({
   reactStrictMode: true,
   experimental: {
     appDir: true,
@@ -11,6 +15,4 @@ const nextConfig = {
     // TODO: turn this off once we get things more stable
     ignoreBuildErrors: true,
   },
-};
-
-module.exports = nextConfig;
+});
