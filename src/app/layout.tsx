@@ -38,13 +38,13 @@ export default async function RootLayout(props: PropsWithChildren) {
 
   return (
     <html lang="en">
-      <ClientProvider>
-        <body
-          className={cn(
-            "min-h-screen bg-white font-sans text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-50",
-            fontSans.variable,
-          )}
-        >
+      <body
+        className={cn(
+          "min-h-screen bg-white font-sans text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-50",
+          fontSans.variable,
+        )}
+      >
+        <ClientProvider>
           <ThemeProvider attribute="class" defaultTheme="dark">
             <div className="flex min-h-screen flex-col">
               <header className="sticky top-0 z-40 w-full border-b border-b-slate-200 bg-white dark:border-b-slate-700 dark:bg-slate-900">
@@ -76,9 +76,11 @@ export default async function RootLayout(props: PropsWithChildren) {
                   <div className="flex flex-row items-center gap-4 px-8 md:px-0">
                     <LogoIcon className="h-6 w-6" />
                     <p className="flex gap-4 text-center text-sm leading-loose text-slate-600 dark:text-slate-400 md:text-left">
-                      <Link href="/profile" className="font-medium underline underline-offset-4">
-                        Profile
-                      </Link>
+                      {user && (
+                        <Link href="/profile" className="font-medium underline underline-offset-4">
+                          Profile
+                        </Link>
+                      )}
                       <Link href="/privacy" className="font-medium underline underline-offset-4">
                         Privacy Policy
                       </Link>
@@ -88,8 +90,8 @@ export default async function RootLayout(props: PropsWithChildren) {
               </footer>
             </div>
           </ThemeProvider>
-        </body>
-      </ClientProvider>
+        </ClientProvider>
+      </body>
       <Script
         async
         defer

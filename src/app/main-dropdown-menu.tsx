@@ -1,5 +1,6 @@
 "use client";
 
+import { Session } from "@auth/core/types";
 import Link from "next/link";
 import type { FC } from "react";
 import { signOut } from "~/auth/client";
@@ -18,7 +19,7 @@ import {
 
 export interface Props {
   avatarFallbackText?: string;
-  user: { email?: string | undefined; image: string | undefined };
+  user: Session["user"];
 }
 
 export const MainDropdownMenu: FC<Props> = ({ user, avatarFallbackText }) => {
@@ -27,7 +28,7 @@ export const MainDropdownMenu: FC<Props> = ({ user, avatarFallbackText }) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
-            <AvatarImage src={user.image} alt="User avatar" />
+            {user.image && <AvatarImage src={user.image} alt="User avatar" />}
             {avatarFallbackText && <AvatarFallback>{avatarFallbackText}</AvatarFallback>}
           </Avatar>
         </Button>

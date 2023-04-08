@@ -14,17 +14,20 @@ See the [Issues](https://github.com/trpc/next-13/issues) for things we want to h
 
 - When a file is sent, send an email to file recipients.
 - Show error messages when files fail to be decrypted or whatever. Can start by just showing an X on the step that failed and checks on the steps that succeed.
-- When decrypting a file to download it, show "Decrypting filename", then "Decrypting <the_filename>"
+- Let users edit the recipients of a file.
 - Consider using AES-GCM instead of AES-CBC throughout.
-- Hide Profile in footer when user is not logged in
 - When the user resets their master password, delete all of the user's FileAccesses (or set deletedAt on them) so that the files don't show up in the user's file tables and so that it doesn't look like the user has access to the files on each file slug url.
 - When the user resets their master password using their existing password, download and re-encrypt all of the files that they have OWNER access to. Set deletedAt on every fileAccess that they do not have OWNER access on.
 - Store the IP Address of each user so that we can identify problem users in the future (does this require a privacy policy?)
-- Improve SEO
-- More server components and fewer client-side requests
+- Improve SEO.
+- More server components and fewer client-side requests.
+- Have users agree to Privacy Policy when signing up.
+- Implement contact form based on privacy policy.
+- Block users outside of US for now.
 
 ## After Launch
 
+- When decrypting a file to download it, show "Decrypting filename", then "Decrypting <the_filename>"
 - Add carbon ads
 - Come up with a paid account. Here are some ideas:
   - Remove user's access to files 7 days after they're sent unless the user is on a paid account. Can probably implement this simply by not letting the user get a presigned link to a file that is more than 7 days old. Don't actually delete the files from S3 and let the user recover all of their old files by upgrading to a paid account.
