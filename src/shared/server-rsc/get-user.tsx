@@ -25,7 +25,7 @@ export function createGetUser(cookies: RequestCookies | ReadonlyRequestCookies) 
     const rows = await db
       .select({ user_id: Schema.users.id, user_name: Schema.users.name, user_email: Schema.users.email })
       .from(Schema.sessions)
-      .innerJoin(Schema.users, eq(Schema.users.id, Schema.sessions.userId))
+      .innerJoin(Schema.users, eq(Schema.users.id, Schema.sessions.user_id))
       .limit(1);
     const session = rows[0];
     if (!session) return null;

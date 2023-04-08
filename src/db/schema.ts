@@ -15,10 +15,10 @@ export const accounts = mysqlTable(
   "accounts",
   {
     id: varchar("id", { length: 191 }).primaryKey().notNull(),
-    userId: varchar("userId", { length: 191 }).notNull(),
+    user_id: varchar("user_id", { length: 191 }).notNull(),
     type: varchar("type", { length: 191 }).notNull(),
     provider: varchar("provider", { length: 191 }).notNull(),
-    providerAccountId: varchar("providerAccountId", { length: 191 }).notNull(),
+    provider_account_id: varchar("provider_account_id", { length: 191 }).notNull(),
     access_token: text("access_token"),
     expires_in: int("expires_in"),
     id_token: text("id_token"),
@@ -27,15 +27,15 @@ export const accounts = mysqlTable(
     scope: varchar("scope", { length: 191 }),
     token_type: varchar("token_type", { length: 191 }),
 
-    createdAt: timestamp("createdAt").notNull().defaultNow(),
-    updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow(),
+    created_at: timestamp("created_at").notNull().defaultNow(),
+    updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (account) => ({
-    providerProviderAccountIdIndex: uniqueIndex("accounts__provider__providerAccountId__idx").on(
+    provider__provider_account_id__index: uniqueIndex("accounts__provider__providerAccountId__idx").on(
       account.provider,
-      account.providerAccountId,
+      account.provider_account_id,
     ),
-    userIdIndex: index("accounts__userId__idx").on(account.userId),
+    user_id__index: index("accounts__userId__idx").on(account.user_id),
   }),
 );
 
@@ -43,16 +43,16 @@ export const sessions = mysqlTable(
   "sessions",
   {
     id: varchar("id", { length: 191 }).primaryKey().notNull(),
-    sessionToken: varchar("sessionToken", { length: 191 }).notNull(),
-    userId: varchar("userId", { length: 191 }).notNull(),
+    session_token: varchar("session_token", { length: 191 }).notNull(),
+    user_id: varchar("user_id", { length: 191 }).notNull(),
     expires: datetime("expires").notNull(),
 
     created_at: timestamp("created_at").notNull().defaultNow(),
     updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (session) => ({
-    sessionTokenIndex: uniqueIndex("sessions__sessionToken__idx").on(session.sessionToken),
-    userIdIndex: index("sessions__userId__idx").on(session.userId),
+    session_token__index: uniqueIndex("sessions__sessionToken__idx").on(session.session_token),
+    user_id__index: index("sessions__userId__idx").on(session.user_id),
   }),
 );
 
@@ -62,7 +62,7 @@ export const users = mysqlTable(
     id: varchar("id", { length: 191 }).primaryKey().notNull(),
     name: varchar("name", { length: 191 }),
     email: varchar("email", { length: 191 }).notNull(),
-    emailVerified: timestamp("emailVerified"),
+    email_verified: timestamp("email_verified"),
     image: varchar("image", { length: 191 }),
 
     /** RSA private key exported as JWK, encrypted with AES, then base64 encoded */
@@ -78,7 +78,7 @@ export const users = mysqlTable(
     updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (user) => ({
-    emailIndex: uniqueIndex("users__email__idx").on(user.email),
+    email__index: uniqueIndex("users__email__idx").on(user.email),
   }),
 );
 
@@ -93,7 +93,7 @@ export const verificationTokens = mysqlTable(
     updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (verificationToken) => ({
-    tokenIndex: uniqueIndex("verification_tokens__token__idx").on(verificationToken.token),
+    token__index: uniqueIndex("verification_tokens__token__idx").on(verificationToken.token),
   }),
 );
 
@@ -121,9 +121,9 @@ export const fileAccesses = mysqlTable(
     updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (fileAccess) => ({
-    user_id_index: index("file_accesses__user_id__index").on(fileAccess.user_id),
-    file_id_index: index("file_accesses__file_id__index").on(fileAccess.file_id),
-    shared_key_id_index: index("file_accesses__shared_key_id__index").on(fileAccess.shared_key_id),
+    user_id__index: index("file_accesses__user_id__index").on(fileAccess.user_id),
+    file_id__index: index("file_accesses__file_id__index").on(fileAccess.file_id),
+    shared_key_id__index: index("file_accesses__shared_key_id__index").on(fileAccess.shared_key_id),
   }),
 );
 
@@ -140,7 +140,7 @@ export const sharedKeys = mysqlTable(
     updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (sharedKey) => ({
-    shared_key_set_id_index: index("shared_keys__shared_key_set_id__index").on(sharedKey.shared_key_set_id),
+    shared_key_set_id__index: index("shared_keys__shared_key_set_id__index").on(sharedKey.shared_key_set_id),
   }),
 );
 
@@ -170,6 +170,6 @@ export const files = mysqlTable(
     updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (file) => ({
-    slug_index: uniqueIndex("files__slug__index").on(file.slug),
+    slug__index: uniqueIndex("files__slug__index").on(file.slug),
   }),
 );

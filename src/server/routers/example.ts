@@ -266,7 +266,7 @@ export const exampleRouter = router({
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 50;
 
-      let countRows = await db
+      const countRows = await db
         .select({ files_count: sql<number>`count(${Schema.files.id})`.as("files_count") })
         .from(Schema.fileAccesses)
         .where(eq(Schema.fileAccesses.user_id, ctx.user.id))
