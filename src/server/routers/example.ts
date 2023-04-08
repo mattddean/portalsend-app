@@ -7,7 +7,7 @@ import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { createId } from "@paralleldrive/cuid2";
 import { TRPCError } from "@trpc/server";
-import { desc, eq, inArray, lte } from "drizzle-orm/expressions";
+import { and, desc, eq, inArray, lte } from "drizzle-orm/expressions";
 import { sql } from "drizzle-orm/sql";
 import { z } from "zod";
 import { db } from "~/db/drizzle-db";
@@ -137,10 +137,8 @@ export const exampleRouter = router({
     .mutation(async ({ ctx, input }) => {
       // TODO: use a db transaction
 
-      const userEmail = ctx.user.email;
-      if (!userEmail) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-
       const sharedKeySetId = createId();
+      const fileId = createId();
 
       await db.insert(Schema.sharedKeySets).values({ id: sharedKeySetId });
 
@@ -160,6 +158,7 @@ export const exampleRouter = router({
         await db.insert(Schema.fileAccesses).values({
           id: createId(),
           user_id: user.id,
+          file_id: fileId,
           shared_key_id: sharedKeyId,
           original_sender: false,
           permission: "VIEWER",
@@ -171,40 +170,34 @@ export const exampleRouter = router({
         encrypted_key: input.encrypted_key_for_self,
         shared_key_set_id: sharedKeySetId,
         id: sharedKeyId,
-        created_at: new Date(),
-        updated_at: new Date(),
       });
 
       await db.insert(Schema.fileAccesses).values({
+        id: createId(),
         user_id: ctx.user.id,
+        file_id: fileId,
         shared_key_id: sharedKeyId,
         original_sender: true,
         permission: "OWNER",
-        id: createId(),
-        created_at: new Date(),
-        updated_at: new Date(),
       });
 
-      const fileId = createId();
       await db.insert(Schema.files).values({
+        id: fileId,
         iv: input.file_iv,
         encrypted_name: input.encrypted_filename,
-        shared_key_set_id: sharedKeySetId,
-        created_at: new Date(),
-        updated_at: new Date(),
-        id: fileId,
         slug: createId(),
         storage_key: createId(),
       });
       const [file] = await db
-        .select({ id: Schema.files.id, storage_key: Schema.files.storage_key, slug: Schema.files.id })
+        .select({ id: Schema.files.id, storage_key: Schema.files.storage_key, slug: Schema.files.slug })
         .from(Schema.files)
         .where(eq(Schema.files.id, fileId))
         .limit(1);
-      if (!file) throw new Error(`File with id ${fileId} not found`);
+      if (!file) throw new Error(`File with id ${fileId} which was just inserted cannot be found`);
 
       // Add a one megabyte buffer in case the encrypted version of the file is a bit longer than the unencrypted version.
-      const maxFileSizeBytes = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_BYTES as string) + 1_000_000;
+      const ONE_MEGABYTE_BYTES = 1_000_000;
+      const maxFileSizeBytes = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_BYTES as string) + ONE_MEGABYTE_BYTES;
 
       const client = getS3Client();
       const { url, fields } = await createPresignedPost(client, {
@@ -215,7 +208,7 @@ export const exampleRouter = router({
           ["content-length-range", 0, maxFileSizeBytes], // 0 bytes to maxFilSize bytes
           ["starts-with", "$Content-Type", ""], // necessary because the frontend will add this form data
         ],
-        Expires: 5 * 60, //Seconds before the presigned post expires. 3600 by default.
+        Expires: 5 * 60, // seconds before the presigned post expires; 3600 by default
       });
 
       return {
@@ -227,16 +220,11 @@ export const exampleRouter = router({
 
   getFile: privateProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
     const [file] = await db
-      .select({
-        encrypted_key: Schema.sharedKeys.encrypted_key,
-        iv: Schema.files.iv,
-      })
+      .select({ encrypted_key: Schema.sharedKeys.encrypted_key, iv: Schema.files.iv })
       .from(Schema.fileAccesses)
-      .where(eq(Schema.files.slug, input.slug))
-      .where(eq(Schema.fileAccesses.user_id, ctx.user.id))
+      .where(and(eq(Schema.files.slug, input.slug), eq(Schema.fileAccesses.user_id, ctx.user.id)))
+      .innerJoin(Schema.files, eq(Schema.files.id, Schema.fileAccesses.file_id))
       .innerJoin(Schema.sharedKeys, eq(Schema.sharedKeys.id, Schema.fileAccesses.shared_key_id))
-      .innerJoin(Schema.sharedKeySets, eq(Schema.sharedKeySets.id, Schema.sharedKeys.shared_key_set_id))
-      .innerJoin(Schema.files, eq(Schema.files.shared_key_set_id, Schema.sharedKeySets.id))
       .limit(1);
 
     // NOT_FOUND is fine if the file exists but the user doesn't have access to it. This prevents revealing that the file exists.
@@ -282,9 +270,7 @@ export const exampleRouter = router({
         .select({ files_count: sql<number>`count(${Schema.files.id})`.as("files_count") })
         .from(Schema.fileAccesses)
         .where(eq(Schema.fileAccesses.user_id, ctx.user.id))
-        .innerJoin(Schema.sharedKeys, eq(Schema.sharedKeys.id, Schema.fileAccesses.shared_key_id))
-        .innerJoin(Schema.sharedKeySets, eq(Schema.sharedKeySets.id, Schema.sharedKeys.shared_key_set_id))
-        .innerJoin(Schema.files, eq(Schema.files.shared_key_set_id, Schema.sharedKeySets.id));
+        .innerJoin(Schema.files, eq(Schema.files.id, Schema.fileAccesses.file_id));
       const totalCount = countRows[0]?.files_count;
       if (totalCount === undefined) throw new Error("Failed to query total file count");
 
@@ -298,9 +284,8 @@ export const exampleRouter = router({
         })
         .from(Schema.fileAccesses)
         .where(eq(Schema.fileAccesses.user_id, ctx.user.id))
+        .innerJoin(Schema.files, eq(Schema.files.id, Schema.fileAccesses.file_id))
         .innerJoin(Schema.sharedKeys, eq(Schema.sharedKeys.id, Schema.fileAccesses.shared_key_id))
-        .innerJoin(Schema.sharedKeySets, eq(Schema.sharedKeySets.id, Schema.sharedKeys.shared_key_set_id))
-        .innerJoin(Schema.files, eq(Schema.files.shared_key_set_id, Schema.sharedKeySets.id))
         .orderBy(desc(Schema.files.created_at))
         .limit(input.limit);
 

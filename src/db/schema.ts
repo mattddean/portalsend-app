@@ -97,7 +97,7 @@ export const verificationTokens = mysqlTable(
   }),
 );
 
-export const fileAccessPermission = mysqlEnum("file_access_permissions", [
+export const fileAccessPermission = mysqlEnum("file_access_permission", [
   "OWNER",
   // "EDITOR" // TODO: add functionality around this permission
   "VIEWER",
@@ -112,15 +112,17 @@ export const fileAccesses = mysqlTable(
   {
     id: varchar("id", { length: 191 }).primaryKey().notNull(),
     user_id: varchar("user_id", { length: 191 }).notNull(),
+    file_id: varchar("file_id", { length: 191 }).notNull(),
     shared_key_id: varchar("shared_key_id", { length: 191 }).notNull(),
-    permission: fileAccessPermission,
-    original_sender: boolean("original_sender"),
+    permission: fileAccessPermission.notNull(),
+    original_sender: boolean("original_sender").notNull(),
 
     created_at: timestamp("created_at").notNull().defaultNow(),
     updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (fileAccess) => ({
     user_id_index: index("file_accesses__user_id__index").on(fileAccess.user_id),
+    file_id_index: index("file_accesses__file_id__index").on(fileAccess.file_id),
     shared_key_id_index: index("file_accesses__shared_key_id__index").on(fileAccess.shared_key_id),
   }),
 );
@@ -164,14 +166,10 @@ export const files = mysqlTable(
     /** Encrypted display name of the file, including its extension if given, base64 encoded */
     encrypted_name: text("encrypted_name").notNull(),
 
-    // TODO: we might have to connect a file access directly to a file so that shared key sets can be reused with different permission levels.
-    shared_key_set_id: varchar("shared_key_set_id", { length: 191 }).notNull(),
-
     created_at: timestamp("created_at").notNull().defaultNow(),
     updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (file) => ({
     slug_index: uniqueIndex("files__slug__index").on(file.slug),
-    shared_key_set_id_index: index("files__shared_key_set_id__index").on(file.shared_key_set_id),
   }),
 );
