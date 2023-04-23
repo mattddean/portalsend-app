@@ -18,8 +18,8 @@ const Page: FC = async () => {
 
   // Fetch the first page of data that FilesTable will look for so that it
   // can be dehydrated, passed to the client, and instantly retrieved.
-  const [user] = await Promise.all([
-    rsc.whoami.fetch(),
+  const [session] = await Promise.all([
+    rsc.example.getSession.fetch(),
     rsc.example.infiniteFiles.fetchInfinite({ limit: initialPageSize, only_sent_received: "received" }),
   ]);
 
@@ -30,9 +30,9 @@ const Page: FC = async () => {
       <div className="flex w-full flex-col items-center gap-8">
         <div className="text-center text-sm text-blue-100">Received files</div>
 
-        {!user && <SignInButtons />}
+        {!session && <SignInButtons />}
 
-        {!!user && (
+        {!!session && (
           // Provide dehydrated state to client components.
           <HydrateClient state={dehydratedState}>
             <InnerPage pageSizes={pageSizes} initialPageSize={initialPageSize} onlySentReceived={"received"} />

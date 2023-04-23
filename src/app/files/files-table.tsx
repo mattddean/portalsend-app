@@ -61,7 +61,7 @@ const convertDataToRow = async (
   const aesKey = await crypto.subtle.importKey(
     "jwk",
     JSON.parse(decryptedAesKeyString) as JsonWebKey,
-    { name: "AES-CBC" },
+    { name: "AES-GCM" },
     true,
     ["decrypt"],
   );

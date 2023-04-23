@@ -27,6 +27,7 @@ export const InnerPage: FC<Props> = ({ pageSizes, initialPageSize, onlySentRecei
   // We only want to fetch this when we know the data from it will be used, so we disable it at first.
   // TODO: fetch when the master password dialog is opened.
   const getMyKeysQuery = api.example.getMyKeys.useQuery(undefined, { enabled: false });
+  console.debug("getMyKeysQuery.data", getMyKeysQuery.data);
 
   const onSubmitMasterPassword = async (pwrd: string) => {
     // Decrypt RSA private key using the user's master password.

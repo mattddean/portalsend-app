@@ -159,14 +159,14 @@ export interface Props {
 }
 
 const FileSlug: NextPage<Props> = ({ params }) => {
-  const user = api.auth.getSession.useQuery();
+  const user = api.example.getSession.useQuery();
 
   // We wait until the user is logged in to fetch this query, because the user will not be allowed to fetch the file
   // unless they are logged in.
   const getFileQuery = api.example.getFile.useQuery(
     { slug: params.slug },
     {
-      enabled: !!user.data?.user,
+      enabled: !!user.data,
       retry: (_attempts, data) => data.data?.code !== "NOT_FOUND",
     },
   );
@@ -236,7 +236,7 @@ const FileSlug: NextPage<Props> = ({ params }) => {
     const importedAesKey = await crypto.subtle.importKey(
       "jwk",
       JSON.parse(decryptedAesKeyString) as JsonWebKey,
-      { name: "AES-CBC" },
+      { name: "AES-GCM" },
       true,
       ["decrypt"],
     );
@@ -250,6 +250,7 @@ const FileSlug: NextPage<Props> = ({ params }) => {
       },
     });
     const signedUrlResult = await createFileSignedUrlMutation.mutateAsync({ slug: getFileQuery.data?.slug });
+    console.debug("signedUrlResult", signedUrlResult);
     const downloadFileResult = await fetch(signedUrlResult.signed_download_url);
     const fileBlob = await downloadFileResult.blob();
     const encryptedFile = new File([fileBlob], "decrypted.txt");
@@ -282,9 +283,9 @@ const FileSlug: NextPage<Props> = ({ params }) => {
     <>
       <div className="h-4" />
 
-      {!user.data?.user && <SignInButtons />}
+      {!user.data && <SignInButtons />}
 
-      {!!user.data?.user && (
+      {!!user.data && (
         <div className="flex w-full flex-col items-center gap-8">
           <div className="text-center text-sm text-blue-100">Download and decrypt the file.</div>
           <div>

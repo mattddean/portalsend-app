@@ -28,16 +28,16 @@ export const metadata = {
 };
 
 export default async function RootLayout(props: PropsWithChildren) {
-  const user = await rsc.whoami.fetch();
+  const session = await rsc.example.getSession.fetch();
 
   const avatarFallbackText = (() => {
-    const userName = user?.name;
+    const userName = session?.name;
     const firstLetterOfUsername = userName?.[0];
     return firstLetterOfUsername?.toUpperCase();
   })();
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
           "min-h-screen bg-white font-sans text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-50",
@@ -54,7 +54,7 @@ export default async function RootLayout(props: PropsWithChildren) {
                   {/* Avatar */}
                   <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
                     <nav className="flex items-center space-x-2">
-                      <>{!!user && <MainDropdownMenu avatarFallbackText={avatarFallbackText} user={user} />}</>
+                      <>{!!session && <MainDropdownMenu avatarFallbackText={avatarFallbackText} user={session} />}</>
                     </nav>
                   </div>
                 </div>
@@ -76,7 +76,7 @@ export default async function RootLayout(props: PropsWithChildren) {
                   <div className="flex flex-row items-center gap-4 px-8 md:px-0">
                     <LogoIcon className="h-6 w-6" />
                     <p className="flex gap-4 text-center text-sm leading-loose text-slate-600 dark:text-slate-400 md:text-left">
-                      {user && (
+                      {session && (
                         <Link href="/profile" className="font-medium underline underline-offset-4">
                           Profile
                         </Link>

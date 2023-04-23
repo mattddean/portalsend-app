@@ -6,9 +6,9 @@ export const runtime = "edge";
 
 /* @ts-expect-error Async Server Component */
 const Page: NextPage = async () => {
-  const user = await rsc.whoami.fetch();
+  const session = await rsc.example.getSession.fetch();
 
-  return <Home user={user} />;
+  return <Home session={session} />;
 };
 
 export default Page;

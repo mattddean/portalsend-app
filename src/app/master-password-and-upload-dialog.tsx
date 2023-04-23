@@ -83,8 +83,12 @@ const MasterPasswordAndUploadDialog: FC<{
   dialogOpen,
   userHasSetUpKeyPair,
 }) => {
+  console.debug("rendering master password and upload dialog");
+
   const [animatedListParentRef] = useAutoAnimate();
   const [password, setPassword] = useState("");
+
+  console.debug("open", dialogOpen);
 
   // Once the user has set up their key pair, encrypt and send the file.
   const initiatedSend = useRef(false);

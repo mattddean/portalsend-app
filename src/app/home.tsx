@@ -1,7 +1,7 @@
 "use client";
 
-import { Session } from "@auth/core/types";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { inferRouterOutputs } from "@trpc/server";
 import { FC, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AlertTriangleIcon } from "~/components/icons";
@@ -20,7 +20,9 @@ import {
   serializeKey,
 } from "~/lib/key-utils";
 import { api } from "~/trpc/client/trpc-client";
+import { AppRouter } from "../server/routers/_app";
 import MasterPasswordAndUploadDialog from "./master-password-and-upload-dialog";
+import { SetKeyPairDialog } from "./set-key-pair-dialog";
 
 export const runtime = "edge";
 
@@ -80,10 +82,12 @@ const encryptKey = async (
 };
 
 export interface Props {
-  user: Session["user"] | undefined;
+  session: inferRouterOutputs<AppRouter>["example"]["getSession"];
 }
 
-const Home: FC<Props> = ({ user }) => {
+const Home: FC<Props> = ({ session }) => {
+  console.debug("session", session);
+
   const [linkToFile, setLinkToFile] = useState<string>();
   const [files, setFiles] = useState<File[]>([]);
   const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
@@ -95,6 +99,9 @@ const Home: FC<Props> = ({ user }) => {
   const [isSendingFile, setIsSendingFile] = useState(false);
   const [finalSendButtonDisabled, setFinalSendButtonDisabled] = useState(false);
 
+  const userIsSignedInButHasNotGeneratedKeyPair = !!session && !session?.keys;
+  const [masterPasswordDialogOpen, setMasterPasswordDialogOpen] = useState(userIsSignedInButHasNotGeneratedKeyPair);
+
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [publicKeysForRecipients, setPublicKeysForRecipients] = useState<PublicKey[]>([]);
 
@@ -102,14 +109,13 @@ const Home: FC<Props> = ({ user }) => {
 
   const getPublicKeysForUsersMutation = api.example.getPublicKeysForUsers.useMutation();
   const createSignedUploadUrlMutation = api.example.createSignedUploadUrl.useMutation();
-  // TODO: Consider including the keys in the next-auth user object or creating an endpoint that
-  // fetches the user and their keys together.
-  const getMyKeysQuery = api.example.getMyKeys.useQuery();
 
   const onDialogOpenClick = async () => {
-    if (user?.email) throw new Error("Failed to get user email");
+    console.debug("user 2", session);
+    if (!session?.email) throw new Error("Failed to get user email");
 
     const publicKeys = await getPublicKeysForUsersMutation.mutateAsync({ user_emails: recipientEmails });
+    console.debug("publicKeys", publicKeys);
     const usersNotSetUp = [];
     for (let i = 0; i < publicKeys.length; i++) {
       const key = publicKeys[i];
@@ -150,12 +156,12 @@ const Home: FC<Props> = ({ user }) => {
       // The UI should have prevented us from getting here.
       throw new Error("Recipient emails are missing.");
     }
-    const myEmail = user?.email;
+    const myEmail = session?.email;
     if (!myEmail) {
       // The UI should have prevented us from getting here.
       throw new Error("Own email is missing");
     }
-    const myPublicKey = getMyKeysQuery.data?.public_key;
+    const myPublicKey = session.keys?.public_key;
     if (!myPublicKey || publicKeysForRecipients.length < 1) {
       // The UI should have prevented us from getting here.
       throw new Error("Public key(s) are missing");
@@ -169,7 +175,7 @@ const Home: FC<Props> = ({ user }) => {
         hoverText: "We generate a unique AES key for this file which will be shared between you and your recipients.",
       },
     ]);
-    const newAesKey = await crypto.subtle.generateKey({ name: "AES-CBC", length: 256 }, true, ["encrypt", "decrypt"]);
+    const newAesKey = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
 
     // Encrypt the shared key for each user, including self.
     setProgressTasks((tasks) => [
@@ -190,7 +196,7 @@ const Home: FC<Props> = ({ user }) => {
       }
       encryptedAesKeyPromises.push(encryptKey(key.email, key.data.public_key, newAesKey));
     }
-    const ownEncryptedSharedKey = await encryptKey(user.email, myPublicKey, newAesKey);
+    const ownEncryptedSharedKey = await encryptKey(session.email, myPublicKey, newAesKey);
     setUsersNotSetUpIndicies(usersNotSetUp);
 
     // TODO: use Promise.allSettled and catch the error and report to the user which users don't have accounts set up.
@@ -255,18 +261,20 @@ const Home: FC<Props> = ({ user }) => {
 
     const decodedSalt = arrayBufferToString(salt);
 
-    await signUp.mutateAsync({
+    console.debug("signing up");
+    signUp.mutate({
       encryptedPrivateKey: btoa(encryptedPrivateKey.ciphertextString),
       encryptedPrivateKeyIv: btoa(encryptedPrivateKey.ivString),
       publicKey: btoa(await serializeKey(keyPair.publicKey)),
       encryptedPrivateKeySalt: btoa(decodedSalt),
     });
+    console.debug("signed up");
   };
 
   const utils = api.useContext();
 
   const onSubmitMasterPassword = async (password: string) => {
-    const publicKey = getMyKeysQuery.data?.public_key;
+    const publicKey = session?.keys?.public_key;
 
     // Has the user not previously generated their key pair?
     if (!publicKey) {
@@ -296,12 +304,12 @@ const Home: FC<Props> = ({ user }) => {
           Dead simple end-to-end encrypted file sharing for everyone.
         </div>
 
-        {/* Sign in buttons */}
         <div className="flex flex-col items-center justify-center gap-4">
-          {!user && <SignInButtons />}
+          {/* Sign in buttons */}
+          {!session && <SignInButtons />}
 
           {/* File upload box */}
-          {!!user && (
+          {!!session && (
             <div className="flex justify-center">
               <Dropzone onDropFiles={setFiles} files={files} />
             </div>
@@ -309,8 +317,18 @@ const Home: FC<Props> = ({ user }) => {
 
           {!!fileError && <div>{fileError}</div>}
 
+          <button onClick={() => setPasswordDialogOpen(true)}>Open</button>
+
+          {userIsSignedInButHasNotGeneratedKeyPair && (
+            <SetKeyPairDialog
+              progressTasks={progressTasks}
+              dialogOpen={masterPasswordDialogOpen}
+              close={() => setMasterPasswordDialogOpen(false)}
+            />
+          )}
+
           {/* Recipient email inputs */}
-          {!!(files.length > 0 && user && !fileError) && (
+          {!!(files.length > 0 && session && !fileError) && (
             <div className="flex w-full max-w-[200px] flex-col justify-start gap-4">
               <div className="flex flex-col gap-2" ref={recipientListAnimateRef}>
                 {Array.from(Array(numRecipientEmailInputs)).map((_unused, index) => {
@@ -391,26 +409,25 @@ const Home: FC<Props> = ({ user }) => {
                   );
                 })}
               </div>
-
-              {/* Send button which spawns master password and upload dialog */}
-              <div>
-                <MasterPasswordAndUploadDialog
-                  onSubmitMasterPassword={onSubmitMasterPassword}
-                  onClickSend={handleEncryptClick}
-                  submitEnabled={recipientEmails.length > 0}
-                  progressTasks={progressTasks}
-                  fileLink={linkToFile}
-                  isSendingFile={isSendingFile}
-                  finalSendButtonDisabled={finalSendButtonDisabled}
-                  onDialogOpenClick={onDialogOpenClick}
-                  dialogOpen={passwordDialogOpen}
-                  close={() => setPasswordDialogOpen(false)}
-                  userHasSetUpKeyPair={getMyKeysQuery.isLoading ? undefined : !!getMyKeysQuery.data?.public_key}
-                />
-              </div>
             </div>
           )}
         </div>
+      </div>
+      {/* Send button which spawns master password and upload dialog */}
+      <div>
+        <MasterPasswordAndUploadDialog
+          onSubmitMasterPassword={onSubmitMasterPassword}
+          onClickSend={handleEncryptClick}
+          submitEnabled={recipientEmails.length > 0}
+          progressTasks={progressTasks}
+          fileLink={linkToFile}
+          isSendingFile={isSendingFile}
+          finalSendButtonDisabled={finalSendButtonDisabled}
+          onDialogOpenClick={onDialogOpenClick}
+          dialogOpen={passwordDialogOpen}
+          close={() => setPasswordDialogOpen(false)}
+          userHasSetUpKeyPair={!!session?.keys?.public_key}
+        />
       </div>
     </>
   );

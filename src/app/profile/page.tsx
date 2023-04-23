@@ -13,7 +13,7 @@ export const metadata = {
 
 /* @ts-expect-error Async Server Component */
 const Home: NextPage = async () => {
-  const user = await rsc.whoami.fetch();
+  const user = await rsc.example.getSession.fetch();
 
   return (
     <>
