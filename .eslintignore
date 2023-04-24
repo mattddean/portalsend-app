@@ -1,2 +1,4 @@
 /next.config.js
 /src/server/env.js
+/prettier.config.js
+/tailwind.config.cjs

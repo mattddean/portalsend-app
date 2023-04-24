@@ -15,8 +15,6 @@ export async function signIn<P extends RedirectableProviderType | undefined = un
 ) {
   const { callbackUrl = window.location.href, redirect = true } = options ?? {};
 
-  console.debug("signIn callbackUrl", callbackUrl);
-
   // TODO: Support custom providers
   const isCredentials = providerId === "credentials";
   const isEmail = providerId === "email";
@@ -50,7 +48,6 @@ export async function signIn<P extends RedirectableProviderType | undefined = un
   if (redirect || !isSupportingReturn || !error) {
     // TODO: Do not redirect for Credentials and Email providers by default in next major
     const redirectTo = data.url ?? data.redirect ?? callbackUrl;
-    console.debug("redirectTo", redirectTo);
     window.location.href = redirectTo;
     // If url contains a hash, the browser does not reload the page. We reload manually
     if (data.url.includes("#")) window.location.reload();

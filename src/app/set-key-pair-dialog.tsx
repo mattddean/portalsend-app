@@ -1,4 +1,3 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { FC, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -10,13 +9,11 @@ import { Label } from "~/components/ui/label";
 import { api } from "../trpc/client/trpc-client";
 
 export const SetKeyPairDialog: FC<{
-  progressTasks: { text: string; hoverText: string }[];
   close: () => unknown;
   dialogOpen: boolean;
-}> = ({ progressTasks, close, dialogOpen }) => {
+}> = ({ close, dialogOpen }) => {
   const utils = api.useContext();
   const signUp = api.example.signUp.useMutation();
-  const [animatedListParentRef] = useAutoAnimate();
   const [password, setPassword] = useState("");
 
   const generateKeyPairAndSignUp = async (password: string) => {
@@ -26,14 +23,12 @@ export const SetKeyPairDialog: FC<{
 
     const decodedSalt = arrayBufferToString(salt);
 
-    console.debug("signing up");
     await signUp.mutateAsync({
       encryptedPrivateKey: btoa(encryptedPrivateKey.ciphertextString),
       encryptedPrivateKeyIv: btoa(encryptedPrivateKey.ivString),
       publicKey: btoa(await serializeKey(keyPair.publicKey)),
       encryptedPrivateKeySalt: btoa(decodedSalt),
     });
-    console.debug("signed up");
 
     await utils.example.getMyKeys.invalidate();
   };

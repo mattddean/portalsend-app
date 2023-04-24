@@ -10,21 +10,12 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/components/ui/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import {
-  arrayBufferToString,
-  encryptAesKey,
-  encryptFile,
-  encryptFilename,
-  encryptRsaPrivateKey,
-  generateRsaKeyPair,
-  serializeKey,
-} from "~/lib/key-utils";
+import { arrayBufferToString, encryptAesKey, encryptFile, encryptFilename } from "~/lib/key-utils";
 import { api } from "~/trpc/client/trpc-client";
+import { PageTagline } from "../components/page-tagline";
 import { AppRouter } from "../server/routers/_app";
 import MasterPasswordAndUploadDialog from "./master-password-and-upload-dialog";
 import { SetKeyPairDialog } from "./set-key-pair-dialog";
-
-export const runtime = "edge";
 
 type PublicKey = {
   email: string;
@@ -68,11 +59,7 @@ const Dropzone: FC<{ onDropFiles: (files: File[]) => unknown; files: File[] }> =
   );
 };
 
-const encryptKey = async (
-  email: string | null | undefined,
-  publicKey: string | null | undefined,
-  sharedKey: CryptoKey,
-) => {
+const encryptKey = async (email: string | null | undefined, publicKey: string | null | undefined, sharedKey: CryptoKey) => {
   await new Promise<void>((resolve) => {
     resolve();
   });
@@ -86,8 +73,6 @@ export interface Props {
 }
 
 const Home: FC<Props> = ({ session }) => {
-  console.debug("session", session);
-
   const [linkToFile, setLinkToFile] = useState<string>();
   const [files, setFiles] = useState<File[]>([]);
   const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
@@ -97,7 +82,6 @@ const Home: FC<Props> = ({ session }) => {
 
   const [progressTasks, setProgressTasks] = useState<{ text: string; hoverText: string }[]>([]);
   const [isSendingFile, setIsSendingFile] = useState(false);
-  const [finalSendButtonDisabled, setFinalSendButtonDisabled] = useState(false);
 
   const userIsSignedInButHasNotGeneratedKeyPair = !!session && !session?.keys;
   const [masterPasswordDialogOpen, setMasterPasswordDialogOpen] = useState(userIsSignedInButHasNotGeneratedKeyPair);
@@ -111,11 +95,9 @@ const Home: FC<Props> = ({ session }) => {
   const createSignedUploadUrlMutation = api.example.createSignedUploadUrl.useMutation();
 
   const onDialogOpenClick = async () => {
-    console.debug("user 2", session);
     if (!session?.email) throw new Error("Failed to get user email");
 
     const publicKeys = await getPublicKeysForUsersMutation.mutateAsync({ user_emails: recipientEmails });
-    console.debug("publicKeys", publicKeys);
     const usersNotSetUp = [];
     for (let i = 0; i < publicKeys.length; i++) {
       const key = publicKeys[i];
@@ -146,7 +128,6 @@ const Home: FC<Props> = ({ session }) => {
 
   const handleEncryptClick = async () => {
     setIsSendingFile(true);
-    setFinalSendButtonDisabled(true);
 
     if (!file) {
       // The UI should have prevented us from getting here.
@@ -252,38 +233,6 @@ const Home: FC<Props> = ({ session }) => {
     setIsSendingFile(false);
   };
 
-  const signUp = api.example.signUp.useMutation();
-
-  const generateKeyPairAndSignUp = async (password: string) => {
-    const keyPair = await generateRsaKeyPair();
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const encryptedPrivateKey = await encryptRsaPrivateKey(keyPair, password, salt);
-
-    const decodedSalt = arrayBufferToString(salt);
-
-    console.debug("signing up");
-    signUp.mutate({
-      encryptedPrivateKey: btoa(encryptedPrivateKey.ciphertextString),
-      encryptedPrivateKeyIv: btoa(encryptedPrivateKey.ivString),
-      publicKey: btoa(await serializeKey(keyPair.publicKey)),
-      encryptedPrivateKeySalt: btoa(decodedSalt),
-    });
-    console.debug("signed up");
-  };
-
-  const utils = api.useContext();
-
-  const onSubmitMasterPassword = async (password: string) => {
-    const publicKey = session?.keys?.public_key;
-
-    // Has the user not previously generated their key pair?
-    if (!publicKey) {
-      await generateKeyPairAndSignUp(password);
-    }
-
-    await utils.example.getMyKeys.invalidate();
-  };
-
   const removeRecipient = (email: string) => {
     setRecipientEmails((emails) => emails.filter((eml) => eml !== email));
     setUsersNotSetUpIndicies([]);
@@ -300,9 +249,7 @@ const Home: FC<Props> = ({ session }) => {
       <div className="h-4" />
 
       <div className="flex w-full flex-col items-center gap-8">
-        <div className="text-center text-sm text-blue-100">
-          Dead simple end-to-end encrypted file sharing for everyone.
-        </div>
+        <PageTagline text="Dead simple end-to-end encrypted file sharing for everyone." />
 
         <div className="flex flex-col items-center justify-center gap-4">
           {/* Sign in buttons */}
@@ -317,14 +264,8 @@ const Home: FC<Props> = ({ session }) => {
 
           {!!fileError && <div>{fileError}</div>}
 
-          <button onClick={() => setPasswordDialogOpen(true)}>Open</button>
-
           {userIsSignedInButHasNotGeneratedKeyPair && (
-            <SetKeyPairDialog
-              progressTasks={progressTasks}
-              dialogOpen={masterPasswordDialogOpen}
-              close={() => setMasterPasswordDialogOpen(false)}
-            />
+            <SetKeyPairDialog dialogOpen={masterPasswordDialogOpen} close={() => setMasterPasswordDialogOpen(false)} />
           )}
 
           {/* Recipient email inputs */}
@@ -372,31 +313,27 @@ const Home: FC<Props> = ({ session }) => {
                                 <div className="space-y-2">
                                   <h4 className="font-medium leading-none">Recipient not found</h4>
                                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    This recipient doesn&rsquo;t have an account or hasn&rsquo;t set up their public
-                                    key. Because of Portalsend&rsquo;s{" "}
+                                    This recipient doesn&rsquo;t have an account or hasn&rsquo;t set up their public key. Because of
+                                    Portalsend&rsquo;s{" "}
                                     <a className="underline" href="#todo">
                                       zero-knowledge architecture
                                     </a>
-                                    , it&rsquo;s impossible for us to share a file with this user until they have set up
-                                    their account.
+                                    , it&rsquo;s impossible for us to share a file with this user until they have set up their account.
                                   </p>
                                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Remove this recipient to continue. We can send them an email if you&rsquo;d like to
-                                    invite them to use Portalsend.
+                                    Remove this recipient to continue. We can send them an email if you&rsquo;d like to invite them to use
+                                    Portalsend.
                                   </p>
                                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Once they join, you&rsquo;ll be able to easily update the recipients of your file,
-                                    even if you&rsquo;ve already sent it.
+                                    Once they join, you&rsquo;ll be able to easily update the recipients of your file, even if you&rsquo;ve
+                                    already sent it.
                                   </p>
                                 </div>
                                 <div className="flex gap-2">
                                   <Button variant="outline" onClick={() => removeRecipient(recipientEmails[index]!)}>
                                     Remove
                                   </Button>
-                                  <Button
-                                    variant="outline"
-                                    onClick={() => removeAndInviteRecipient(recipientEmails[index]!)}
-                                  >
+                                  <Button variant="outline" onClick={() => removeAndInviteRecipient(recipientEmails[index]!)}>
                                     Remove and Invite
                                   </Button>
                                 </div>
@@ -413,22 +350,23 @@ const Home: FC<Props> = ({ session }) => {
           )}
         </div>
       </div>
+
       {/* Send button which spawns master password and upload dialog */}
-      <div>
-        <MasterPasswordAndUploadDialog
-          onSubmitMasterPassword={onSubmitMasterPassword}
-          onClickSend={handleEncryptClick}
-          submitEnabled={recipientEmails.length > 0}
-          progressTasks={progressTasks}
-          fileLink={linkToFile}
-          isSendingFile={isSendingFile}
-          finalSendButtonDisabled={finalSendButtonDisabled}
-          onDialogOpenClick={onDialogOpenClick}
-          dialogOpen={passwordDialogOpen}
-          close={() => setPasswordDialogOpen(false)}
-          userHasSetUpKeyPair={!!session?.keys?.public_key}
-        />
-      </div>
+      {!!file && (
+        <div>
+          <MasterPasswordAndUploadDialog
+            onClickSend={handleEncryptClick}
+            submitEnabled={recipientEmails.length > 0}
+            progressTasks={progressTasks}
+            fileLink={linkToFile}
+            isSendingFile={isSendingFile}
+            onDialogOpenClick={onDialogOpenClick}
+            dialogOpen={passwordDialogOpen}
+            close={() => setPasswordDialogOpen(false)}
+            userHasSetUpKeyPair={!!session?.keys?.public_key}
+          />
+        </div>
+      )}
     </>
   );
 };

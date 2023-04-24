@@ -250,7 +250,6 @@ const FileSlug: NextPage<Props> = ({ params }) => {
       },
     });
     const signedUrlResult = await createFileSignedUrlMutation.mutateAsync({ slug: getFileQuery.data?.slug });
-    console.debug("signedUrlResult", signedUrlResult);
     const downloadFileResult = await fetch(signedUrlResult.signed_download_url);
     const fileBlob = await downloadFileResult.blob();
     const encryptedFile = new File([fileBlob], "decrypted.txt");
