@@ -1,6 +1,6 @@
 import "./globals.css";
 
-import { Inter as FontSans } from "next/font/google";
+import { Inter as FontSans, Tourney } from "next/font/google";
 import Link from "next/link";
 import Script from "next/script";
 import { PropsWithChildren } from "react";
@@ -16,6 +16,12 @@ import { MainDropdownMenu } from "./main-dropdown-menu";
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+const fontTourney = Tourney({
+  subsets: ["latin"],
+  variable: "--tourney",
   display: "swap",
 });
 
@@ -40,14 +46,15 @@ export default async function RootLayout(props: PropsWithChildren) {
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-white font-sans text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-50",
+          "min-h-screen bg-white font-sans text-slate-900 antialiased dark:bg-[#012840] dark:text-slate-50",
           fontSans.variable,
+          fontTourney.variable,
         )}
       >
         <ClientProvider>
           <ThemeProvider attribute="class" defaultTheme="dark">
             <div className="flex min-h-screen flex-col">
-              <header className="sticky top-0 z-40 w-full border-b border-b-slate-200 bg-white dark:border-b-slate-700 dark:bg-slate-900">
+              <header className="sticky top-0 z-40 w-full border-b border-b-slate-200 bg-white dark:border-b-slate-700 dark:bg-[#012840]">
                 <div className="container flex h-16 items-center">
                   <MainNav />
                   <MobileNav />
@@ -60,10 +67,10 @@ export default async function RootLayout(props: PropsWithChildren) {
                 </div>
               </header>
 
-              <main className="flex-1 items-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
+              <main className="flex-1 items-center bg-gradient-to-b from-[#591240] to-[#012840] text-white">
                 <div className="container mt-12 flex flex-col items-center justify-center">
-                  <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-                    <span className="text-[hsl(280,100%,70%)]">Portalsend</span>
+                  <h1 className="text-6xl font-extrabold tracking-tight sm:text-[7rem]">
+                    <span className="font-tourney font-semibold italic text-[#F27405]">Portalsend</span>
                   </h1>
                   {props.children}
                 </div>

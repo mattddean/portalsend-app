@@ -15,6 +15,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        tourney: ["var(--tourney)", ...fontFamily.sans],
       },
       keyframes: {
         "accordion-down": {
