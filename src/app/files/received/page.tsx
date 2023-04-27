@@ -1,4 +1,5 @@
 import { type FC } from "react";
+import { PageTagline } from "~/components/page-tagline";
 import SignInButtons from "~/components/sign-in-options";
 import { rsc } from "~/shared/server-rsc/trpc";
 import { HydrateClient } from "~/trpc/client/hydrate-client";
@@ -28,7 +29,7 @@ const Page: FC = async () => {
     <>
       <div className="h-4" />
       <div className="flex w-full flex-col items-center gap-8">
-        <div className="text-center text-sm text-blue-100">Received files</div>
+        <PageTagline text="Received files" />
 
         {!session && <SignInButtons />}
 

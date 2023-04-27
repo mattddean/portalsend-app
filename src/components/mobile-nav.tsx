@@ -14,17 +14,14 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { docsConfig } from "~/config/docs";
 import { siteConfig } from "~/config/site";
+import { cn } from "../lib/utils";
 import { LogoIcon } from "./icons";
-import { cn } from "./ui/lib/utils";
 
 export function MobileNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="-ml-4 text-base hover:bg-transparent focus:ring-0  focus:ring-offset-0 md:hidden"
-        >
+        <Button variant="ghost" className="-ml-4 text-base hover:bg-transparent focus:ring-0  focus:ring-offset-0 md:hidden">
           <LogoIcon className="mr-2 h-4 w-4" /> <span className="font-bold">Menu</span>
         </Button>
       </DropdownMenuTrigger>

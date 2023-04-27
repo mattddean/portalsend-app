@@ -1,12 +1,5 @@
 import { dehydrate, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  OnChangeFn,
-  PaginationState,
-  useReactTable,
-} from "@tanstack/react-table";
+import { ColumnDef, OnChangeFn, PaginationState, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { inferRouterOutputs } from "@trpc/server";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -16,8 +9,8 @@ import type { AppRouter } from "~/server/routers/_app";
 import { api } from "~/trpc/client/trpc-client";
 import { ChevronLeftIcon, ChevronRightIcon, SpinnerIcon, UnlockIcon } from "../../components/icons";
 import { Button } from "../../components/ui/button";
-import { cn } from "../../components/ui/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { cn } from "../../lib/utils";
 
 interface Row {
   filename: string;
@@ -50,21 +43,13 @@ const convertDataToRow = async (
   }
 
   // Decrypt shared AES key using RSA private key.
-  const decryptedAesKey = await crypto.subtle.decrypt(
-    { name: "RSA-OAEP" },
-    rsaPrivateKey,
-    stringToUint8Array(atob(item.encrypted_key)),
-  );
+  const decryptedAesKey = await crypto.subtle.decrypt({ name: "RSA-OAEP" }, rsaPrivateKey, stringToUint8Array(atob(item.encrypted_key)));
 
   // Import shared AES key.
   const decryptedAesKeyString = new TextDecoder().decode(new Uint8Array(decryptedAesKey));
-  const aesKey = await crypto.subtle.importKey(
-    "jwk",
-    JSON.parse(decryptedAesKeyString) as JsonWebKey,
-    { name: "AES-GCM" },
-    true,
-    ["decrypt"],
-  );
+  const aesKey = await crypto.subtle.importKey("jwk", JSON.parse(decryptedAesKeyString) as JsonWebKey, { name: "AES-GCM" }, true, [
+    "decrypt",
+  ]);
 
   // Decrypt filename.
   const iv = stringToUint8Array(atob(item.iv));
@@ -89,13 +74,7 @@ export interface Props {
 }
 
 /** @todo option to sort ascending by time and ability to search, once the user has decrypted the file names */
-export const FilesTable: FC<Props> = ({
-  onlySentReceived,
-  rsaPrivateKey,
-  onClickDecryptFilenames,
-  pageSizes,
-  initialPageSize,
-}) => {
+export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClickDecryptFilenames, pageSizes, initialPageSize }) => {
   // Dehydrate data that we fetched on the server in server components higher up the tree
   const queryClient = useQueryClient();
   dehydrate(queryClient);
@@ -218,10 +197,7 @@ export const FilesTable: FC<Props> = ({
                             <td className="w-[50%] whitespace-nowrap text-sm text-slate-300" role="cell" key={cell.id}>
                               <Link
                                 href={`/file/${row.original.slug}`}
-                                className={cn(
-                                  "block h-full w-full px-6 py-4",
-                                  cell.column.id === "filename" && "hover:underline",
-                                )}
+                                className={cn("block h-full w-full px-6 py-4", cell.column.id === "filename" && "hover:underline")}
                               >
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                               </Link>

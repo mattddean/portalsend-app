@@ -8,7 +8,7 @@ import { LogoIcon } from "~/components/icons";
 import { MainNav } from "~/components/main-nav/main-nav";
 import { MobileNav } from "~/components/mobile-nav";
 import { ThemeProvider } from "~/components/theme-provider";
-import { cn } from "~/components/ui/lib/utils";
+import { cn } from "~/lib/utils";
 import { rsc } from "~/shared/server-rsc/trpc";
 import { ClientProvider } from "~/trpc/client/trpc-client";
 import { MainDropdownMenu } from "./main-dropdown-menu";
