@@ -164,7 +164,7 @@ export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClick
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-lg border-b border-gray-200 shadow">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-slate-800">
+                <thead className="bg-muted">
                   {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                       {headerGroup.headers.map((header) => {
@@ -188,7 +188,7 @@ export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClick
                     </tr>
                   ))}
                 </thead>
-                <tbody className="divide-y divide-slate-800 bg-slate-900">
+                <tbody className="divide-y divide-slate-800 bg-muted">
                   {table.getRowModel().rows.map((row) => {
                     return (
                       <tr key={row.id}>
@@ -220,16 +220,26 @@ export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClick
           {/* simplified mobile version */}
           <div className="flex flex-1 justify-between sm:hidden">
             <div className="flex gap-2">
-              <Button variant="subtle" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+              <Button
+                variant="secondary"
+                className="border border-border"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
                 Previous
               </Button>
               {!rsaPrivateKey && (
-                <Button variant="outline" onClick={onClickDecryptFilenames}>
+                <Button variant="secondary" className="border border-border" onClick={onClickDecryptFilenames}>
                   <UnlockIcon className="h-5 w-5 text-gray-500" />
                 </Button>
               )}
             </div>
-            <Button variant="subtle" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+            <Button
+              variant="secondary"
+              className="border border-border"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
               Next
             </Button>
           </div>
@@ -249,7 +259,7 @@ export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClick
                     table.setPageSize(Number(val));
                   }}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px] bg-secondary">
                     <SelectValue placeholder="Select a fruit" />
                   </SelectTrigger>
                   <SelectContent>
@@ -262,7 +272,7 @@ export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClick
                 </Select>
               </label>
               {!rsaPrivateKey && (
-                <Button variant="outline" onClick={onClickDecryptFilenames}>
+                <Button variant="secondary" className="border border-border" onClick={onClickDecryptFilenames}>
                   <UnlockIcon className="h-5 w-5 text-gray-500" />
                 </Button>
               )}
@@ -271,14 +281,24 @@ export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClick
               <div>{dataQuery.isFetching ? <SpinnerIcon className="mr-2 h-4 w-4 animate-spin" /> : null}</div>
               <nav className="relative z-0 inline-flex gap-2 -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                 <div className="flex gap-2">
-                  <Button variant="subtle" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                  <Button
+                    variant="secondary"
+                    className="border border-border"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                  >
                     <>
                       <span className="sr-only">Previous</span>
                       <ChevronLeftIcon className="h-5 w-5 text-gray-500" aria-hidden="true" />
                     </>
                   </Button>
                 </div>
-                <Button variant="subtle" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                <Button
+                  variant="secondary"
+                  className="border border-border"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
                   <>
                     <span className="sr-only">Next</span>
                     <ChevronRightIcon className="h-5 w-5 text-gray-500" aria-hidden="true" />

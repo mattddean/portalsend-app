@@ -47,7 +47,7 @@ const Dropzone: FC<{ onDropFiles: (files: File[]) => unknown; files: File[] }> =
         >
           <div
             className={cn(
-              "flex h-full w-full items-center justify-center rounded-[11px] bg-slate-900 px-10 text-lg text-white",
+              "flex h-full w-full items-center justify-center rounded-[11px] bg-muted px-10 text-lg text-white",
               !!file && "text-sm",
             )}
           >

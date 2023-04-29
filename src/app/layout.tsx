@@ -11,7 +11,7 @@ import { ThemeProvider } from "~/components/theme-provider";
 import { cn } from "~/lib/utils";
 import { rsc } from "~/shared/server-rsc/trpc";
 import { ClientProvider } from "~/trpc/client/trpc-client";
-import { MainDropdownMenu } from "./main-dropdown-menu";
+import { AvatarDropdownMenu } from "./avatar-dropdown-menu";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -46,7 +46,7 @@ export default async function RootLayout(props: PropsWithChildren) {
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-white font-sans text-slate-900 antialiased dark:bg-[#012840] dark:text-slate-50",
+          "min-h-screen bg-white font-sans text-slate-900 antialiased dark:bg-background dark:text-slate-50",
           fontSans.variable,
           fontTourney.variable,
         )}
@@ -54,23 +54,23 @@ export default async function RootLayout(props: PropsWithChildren) {
         <ClientProvider>
           <ThemeProvider attribute="class" defaultTheme="dark">
             <div className="flex min-h-screen flex-col">
-              <header className="sticky top-0 z-40 w-full border-b border-b-slate-200 bg-white dark:border-b-slate-700 dark:bg-[#012840]">
+              <header className="sticky top-0 z-40 w-full border-b border-b-border bg-white dark:border-b-border dark:bg-background">
                 <div className="container flex h-16 items-center">
                   <MainNav />
                   <MobileNav />
                   {/* Avatar */}
                   <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
                     <nav className="flex items-center space-x-2">
-                      <>{!!session && <MainDropdownMenu avatarFallbackText={avatarFallbackText} user={session} />}</>
+                      <>{!!session && <AvatarDropdownMenu avatarFallbackText={avatarFallbackText} user={session} />}</>
                     </nav>
                   </div>
                 </div>
               </header>
 
-              <main className="flex-1 items-center bg-gradient-to-b from-[#591240] to-[#012840] text-white">
+              <main className="flex-1 items-center bg-gradient-to-b from-radish to-background text-white">
                 <div className="container mt-12 flex flex-col items-center justify-center">
                   <h1 className="text-6xl font-extrabold tracking-tight sm:text-[7rem]">
-                    <span className="font-tourney font-semibold italic text-[#F27405]">Portalsend</span>
+                    <span className="font-tourney font-semibold italic text-accent-foreground">Portalsend</span>
                   </h1>
                   {props.children}
                 </div>

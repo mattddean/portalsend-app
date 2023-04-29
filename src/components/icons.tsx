@@ -21,7 +21,7 @@ import { FC } from "react";
 export type Icon = LucideIcon;
 
 const Logo: FC<LucideProps> = (props) => (
-  <div className="text-[#F27405]">
+  <div className="text-accent-foreground">
     <svg
       viewBox="0 0 24 24"
       fill="currentColor"
