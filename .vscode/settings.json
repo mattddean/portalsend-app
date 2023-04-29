@@ -1,7 +1,7 @@
 {
   "javascript.validate.enable": false,
   "typescript.validate.enable": true,
-  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.tsdk": "./node_modules/typescript/lib",
   "editor.defaultFormatter": "esbenp.prettier-vscode",

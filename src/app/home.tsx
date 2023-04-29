@@ -1,28 +1,21 @@
 "use client";
 
-import { Session } from "@auth/core/types";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { inferRouterOutputs } from "@trpc/server";
 import { FC, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AlertTriangleIcon } from "~/components/icons";
 import SignInButtons from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { cn } from "~/components/ui/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import {
-  arrayBufferToString,
-  encryptAesKey,
-  encryptFile,
-  encryptFilename,
-  encryptRsaPrivateKey,
-  generateRsaKeyPair,
-  serializeKey,
-} from "~/lib/key-utils";
+import { arrayBufferToString, encryptAesKey, encryptFile, encryptFilename } from "~/lib/key-utils";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/client/trpc-client";
+import { PageTagline } from "../components/page-tagline";
+import { AppRouter } from "../server/routers/_app";
 import MasterPasswordAndUploadDialog from "./master-password-and-upload-dialog";
-
-export const runtime = "edge";
+import { SetKeyPairDialog } from "./set-key-pair-dialog";
 
 type PublicKey = {
   email: string;
@@ -54,7 +47,7 @@ const Dropzone: FC<{ onDropFiles: (files: File[]) => unknown; files: File[] }> =
         >
           <div
             className={cn(
-              "flex h-full w-full items-center justify-center rounded-[11px] bg-slate-900 px-10 text-lg text-white",
+              "flex h-full w-full items-center justify-center rounded-[11px] bg-muted px-10 text-lg text-white",
               !!file && "text-sm",
             )}
           >
@@ -66,11 +59,7 @@ const Dropzone: FC<{ onDropFiles: (files: File[]) => unknown; files: File[] }> =
   );
 };
 
-const encryptKey = async (
-  email: string | null | undefined,
-  publicKey: string | null | undefined,
-  sharedKey: CryptoKey,
-) => {
+const encryptKey = async (email: string | null | undefined, publicKey: string | null | undefined, sharedKey: CryptoKey) => {
   await new Promise<void>((resolve) => {
     resolve();
   });
@@ -80,10 +69,10 @@ const encryptKey = async (
 };
 
 export interface Props {
-  user: Session["user"] | undefined;
+  session: inferRouterOutputs<AppRouter>["example"]["getSession"];
 }
 
-const Home: FC<Props> = ({ user }) => {
+const Home: FC<Props> = ({ session }) => {
   const [linkToFile, setLinkToFile] = useState<string>();
   const [files, setFiles] = useState<File[]>([]);
   const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
@@ -93,7 +82,9 @@ const Home: FC<Props> = ({ user }) => {
 
   const [progressTasks, setProgressTasks] = useState<{ text: string; hoverText: string }[]>([]);
   const [isSendingFile, setIsSendingFile] = useState(false);
-  const [finalSendButtonDisabled, setFinalSendButtonDisabled] = useState(false);
+
+  const userIsSignedInButHasNotGeneratedKeyPair = !!session && !session?.keys;
+  const [masterPasswordDialogOpen, setMasterPasswordDialogOpen] = useState(userIsSignedInButHasNotGeneratedKeyPair);
 
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [publicKeysForRecipients, setPublicKeysForRecipients] = useState<PublicKey[]>([]);
@@ -102,12 +93,9 @@ const Home: FC<Props> = ({ user }) => {
 
   const getPublicKeysForUsersMutation = api.example.getPublicKeysForUsers.useMutation();
   const createSignedUploadUrlMutation = api.example.createSignedUploadUrl.useMutation();
-  // TODO: Consider including the keys in the next-auth user object or creating an endpoint that
-  // fetches the user and their keys together.
-  const getMyKeysQuery = api.example.getMyKeys.useQuery();
 
   const onDialogOpenClick = async () => {
-    if (user?.email) throw new Error("Failed to get user email");
+    if (!session?.email) throw new Error("Failed to get user email");
 
     const publicKeys = await getPublicKeysForUsersMutation.mutateAsync({ user_emails: recipientEmails });
     const usersNotSetUp = [];
@@ -140,7 +128,6 @@ const Home: FC<Props> = ({ user }) => {
 
   const handleEncryptClick = async () => {
     setIsSendingFile(true);
-    setFinalSendButtonDisabled(true);
 
     if (!file) {
       // The UI should have prevented us from getting here.
@@ -150,12 +137,12 @@ const Home: FC<Props> = ({ user }) => {
       // The UI should have prevented us from getting here.
       throw new Error("Recipient emails are missing.");
     }
-    const myEmail = user?.email;
+    const myEmail = session?.email;
     if (!myEmail) {
       // The UI should have prevented us from getting here.
       throw new Error("Own email is missing");
     }
-    const myPublicKey = getMyKeysQuery.data?.public_key;
+    const myPublicKey = session.keys?.public_key;
     if (!myPublicKey || publicKeysForRecipients.length < 1) {
       // The UI should have prevented us from getting here.
       throw new Error("Public key(s) are missing");
@@ -169,7 +156,7 @@ const Home: FC<Props> = ({ user }) => {
         hoverText: "We generate a unique AES key for this file which will be shared between you and your recipients.",
       },
     ]);
-    const newAesKey = await crypto.subtle.generateKey({ name: "AES-CBC", length: 256 }, true, ["encrypt", "decrypt"]);
+    const newAesKey = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
 
     // Encrypt the shared key for each user, including self.
     setProgressTasks((tasks) => [
@@ -190,7 +177,7 @@ const Home: FC<Props> = ({ user }) => {
       }
       encryptedAesKeyPromises.push(encryptKey(key.email, key.data.public_key, newAesKey));
     }
-    const ownEncryptedSharedKey = await encryptKey(user.email, myPublicKey, newAesKey);
+    const ownEncryptedSharedKey = await encryptKey(session.email, myPublicKey, newAesKey);
     setUsersNotSetUpIndicies(usersNotSetUp);
 
     // TODO: use Promise.allSettled and catch the error and report to the user which users don't have accounts set up.
@@ -246,36 +233,6 @@ const Home: FC<Props> = ({ user }) => {
     setIsSendingFile(false);
   };
 
-  const signUp = api.example.signUp.useMutation();
-
-  const generateKeyPairAndSignUp = async (password: string) => {
-    const keyPair = await generateRsaKeyPair();
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const encryptedPrivateKey = await encryptRsaPrivateKey(keyPair, password, salt);
-
-    const decodedSalt = arrayBufferToString(salt);
-
-    await signUp.mutateAsync({
-      encryptedPrivateKey: btoa(encryptedPrivateKey.ciphertextString),
-      encryptedPrivateKeyIv: btoa(encryptedPrivateKey.ivString),
-      publicKey: btoa(await serializeKey(keyPair.publicKey)),
-      encryptedPrivateKeySalt: btoa(decodedSalt),
-    });
-  };
-
-  const utils = api.useContext();
-
-  const onSubmitMasterPassword = async (password: string) => {
-    const publicKey = getMyKeysQuery.data?.public_key;
-
-    // Has the user not previously generated their key pair?
-    if (!publicKey) {
-      await generateKeyPairAndSignUp(password);
-    }
-
-    await utils.example.getMyKeys.invalidate();
-  };
-
   const removeRecipient = (email: string) => {
     setRecipientEmails((emails) => emails.filter((eml) => eml !== email));
     setUsersNotSetUpIndicies([]);
@@ -292,16 +249,14 @@ const Home: FC<Props> = ({ user }) => {
       <div className="h-4" />
 
       <div className="flex w-full flex-col items-center gap-8">
-        <div className="text-center text-sm text-blue-100">
-          Dead simple end-to-end encrypted file sharing for everyone.
-        </div>
+        <PageTagline text="Dead simple end-to-end encrypted file sharing for everyone." />
 
-        {/* Sign in buttons */}
         <div className="flex flex-col items-center justify-center gap-4">
-          {!user && <SignInButtons />}
+          {/* Sign in buttons */}
+          {!session && <SignInButtons />}
 
           {/* File upload box */}
-          {!!user && (
+          {!!session && (
             <div className="flex justify-center">
               <Dropzone onDropFiles={setFiles} files={files} />
             </div>
@@ -309,8 +264,12 @@ const Home: FC<Props> = ({ user }) => {
 
           {!!fileError && <div>{fileError}</div>}
 
+          {userIsSignedInButHasNotGeneratedKeyPair && (
+            <SetKeyPairDialog dialogOpen={masterPasswordDialogOpen} close={() => setMasterPasswordDialogOpen(false)} />
+          )}
+
           {/* Recipient email inputs */}
-          {!!(files.length > 0 && user && !fileError) && (
+          {!!(files.length > 0 && session && !fileError) && (
             <div className="flex w-full max-w-[200px] flex-col justify-start gap-4">
               <div className="flex flex-col gap-2" ref={recipientListAnimateRef}>
                 {Array.from(Array(numRecipientEmailInputs)).map((_unused, index) => {
@@ -354,31 +313,27 @@ const Home: FC<Props> = ({ user }) => {
                                 <div className="space-y-2">
                                   <h4 className="font-medium leading-none">Recipient not found</h4>
                                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    This recipient doesn&rsquo;t have an account or hasn&rsquo;t set up their public
-                                    key. Because of Portalsend&rsquo;s{" "}
+                                    This recipient doesn&rsquo;t have an account or hasn&rsquo;t set up their public key. Because of
+                                    Portalsend&rsquo;s{" "}
                                     <a className="underline" href="#todo">
                                       zero-knowledge architecture
                                     </a>
-                                    , it&rsquo;s impossible for us to share a file with this user until they have set up
-                                    their account.
+                                    , it&rsquo;s impossible for us to share a file with this user until they have set up their account.
                                   </p>
                                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Remove this recipient to continue. We can send them an email if you&rsquo;d like to
-                                    invite them to use Portalsend.
+                                    Remove this recipient to continue. We can send them an email if you&rsquo;d like to invite them to use
+                                    Portalsend.
                                   </p>
                                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Once they join, you&rsquo;ll be able to easily update the recipients of your file,
-                                    even if you&rsquo;ve already sent it.
+                                    Once they join, you&rsquo;ll be able to easily update the recipients of your file, even if you&rsquo;ve
+                                    already sent it.
                                   </p>
                                 </div>
                                 <div className="flex gap-2">
                                   <Button variant="outline" onClick={() => removeRecipient(recipientEmails[index]!)}>
                                     Remove
                                   </Button>
-                                  <Button
-                                    variant="outline"
-                                    onClick={() => removeAndInviteRecipient(recipientEmails[index]!)}
-                                  >
+                                  <Button variant="outline" onClick={() => removeAndInviteRecipient(recipientEmails[index]!)}>
                                     Remove and Invite
                                   </Button>
                                 </div>
@@ -391,27 +346,27 @@ const Home: FC<Props> = ({ user }) => {
                   );
                 })}
               </div>
-
-              {/* Send button which spawns master password and upload dialog */}
-              <div>
-                <MasterPasswordAndUploadDialog
-                  onSubmitMasterPassword={onSubmitMasterPassword}
-                  onClickSend={handleEncryptClick}
-                  submitEnabled={recipientEmails.length > 0}
-                  progressTasks={progressTasks}
-                  fileLink={linkToFile}
-                  isSendingFile={isSendingFile}
-                  finalSendButtonDisabled={finalSendButtonDisabled}
-                  onDialogOpenClick={onDialogOpenClick}
-                  dialogOpen={passwordDialogOpen}
-                  close={() => setPasswordDialogOpen(false)}
-                  userHasSetUpKeyPair={getMyKeysQuery.isLoading ? undefined : !!getMyKeysQuery.data?.public_key}
-                />
-              </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Send button which spawns master password and upload dialog */}
+      {!!file && (
+        <div>
+          <MasterPasswordAndUploadDialog
+            onClickSend={handleEncryptClick}
+            submitEnabled={recipientEmails.length > 0}
+            progressTasks={progressTasks}
+            fileLink={linkToFile}
+            isSendingFile={isSendingFile}
+            onDialogOpenClick={onDialogOpenClick}
+            dialogOpen={passwordDialogOpen}
+            close={() => setPasswordDialogOpen(false)}
+            userHasSetUpKeyPair={!!session?.keys?.public_key}
+          />
+        </div>
+      )}
     </>
   );
 };

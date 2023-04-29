@@ -2,13 +2,9 @@
 
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
 import * as React from "react";
-import { cn } from "./lib/utils";
+import { cn } from "~/lib/utils";
 
-const DEFAULT_DELAY = 80;
-
-const HoverCard: React.FC<HoverCardPrimitive.HoverCardProps> = (props) => {
-  return <HoverCardPrimitive.Root openDelay={DEFAULT_DELAY} closeDelay={DEFAULT_DELAY} {...props} />;
-};
+const HoverCard = HoverCardPrimitive.Root;
 
 const HoverCardTrigger = HoverCardPrimitive.Trigger;
 
@@ -21,7 +17,7 @@ const HoverCardContent = React.forwardRef<
     align={align}
     sideOffset={sideOffset}
     className={cn(
-      "animate-in zoom-in-90 z-50 w-64 rounded-md border border-slate-100 bg-white p-4 shadow-md outline-none dark:border-slate-800 dark:bg-slate-800",
+      "z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in zoom-in-90",
       className,
     )}
     {...props}
@@ -29,4 +25,4 @@ const HoverCardContent = React.forwardRef<
 ));
 HoverCardContent.displayName = HoverCardPrimitive.Content.displayName;
 
-export { HoverCard, HoverCardTrigger, HoverCardContent };
+export { HoverCard, HoverCardContent, HoverCardTrigger };

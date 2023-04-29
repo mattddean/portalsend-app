@@ -8,9 +8,8 @@ Dead simple end-to-end encrypted file sharing for everyone.
 
 - Fix privacy policy table
 - Fix privacy policy receive information from third parties, because we receive information from github/google/etc.
-- Create two places to set up keys:
-  1. In a modal when trying to send a file, after asking for recipients.
-  2. When setting up an account on invitation.
+- Create another place to set up keys:
+  - When setting up an account on invitation.
 - Disable send button when there is a bad email in the bunch.
 - Show a different message when the other user's keys aren't set up yet but they have created an account.
 - When a file is sent, send an email to file recipients.
@@ -24,6 +23,9 @@ Dead simple end-to-end encrypted file sharing for everyone.
 - Have users agree to Privacy Policy when signing up. And make sure they're above 18.
 - Implement contact form based on privacy policy.
 - Block users outside of US for now.
+- Use crystals-kyber: https://github.com/antontutoveanu/crystals-kyber-javascript
+- Store encryption algorithm of stored shared keys and of stored public keys
+- Enforce type imports using eslint
 
 ### After Launch
 

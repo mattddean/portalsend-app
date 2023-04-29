@@ -21,7 +21,7 @@ import { FC } from "react";
 export type Icon = LucideIcon;
 
 const Logo: FC<LucideProps> = (props) => (
-  <div className="text-[hsl(280,100%,70%)]">
+  <div className="text-accent-foreground">
     <svg
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -57,19 +57,19 @@ const GoogleIcon: FC<LucideProps> = (props: LucideProps) => (
 );
 
 export {
-  Loader2 as SpinnerIcon,
-  X as CloseIcon,
-  GithubIcon,
-  GoogleIcon,
-  Twitter as TwitterIcon,
-  Logo as LogoIcon,
+  AlertTriangle as AlertTriangleIcon,
+  Check as CheckIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
+  X as CloseIcon,
+  Copy as CopyIcon,
+  GithubIcon,
+  GoogleIcon,
   Lock as LockIcon,
   LogOut as LogOutIcon,
-  User as UserIcon,
-  Copy as CopyIcon,
-  Check as CheckIcon,
+  Logo as LogoIcon,
+  Loader2 as SpinnerIcon,
+  Twitter as TwitterIcon,
   Unlock as UnlockIcon,
-  AlertTriangle as AlertTriangleIcon,
+  User as UserIcon,
 };

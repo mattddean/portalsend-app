@@ -22,18 +22,18 @@ export interface Props {
   user: Session["user"];
 }
 
-export const MainDropdownMenu: FC<Props> = ({ user, avatarFallbackText }) => {
+export const AvatarDropdownMenu: FC<Props> = ({ user, avatarFallbackText }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
             {user.image && <AvatarImage src={user.image} alt="User avatar" />}
-            {avatarFallbackText && <AvatarFallback>{avatarFallbackText}</AvatarFallback>}
+            {avatarFallbackText && <AvatarFallback className="bg-radish">{avatarFallbackText}</AvatarFallback>}
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-56 bg-muted" align="end" forceMount>
         <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

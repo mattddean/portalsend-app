@@ -1,12 +1,5 @@
 import { dehydrate, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  OnChangeFn,
-  PaginationState,
-  useReactTable,
-} from "@tanstack/react-table";
+import { ColumnDef, OnChangeFn, PaginationState, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { inferRouterOutputs } from "@trpc/server";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -16,8 +9,8 @@ import type { AppRouter } from "~/server/routers/_app";
 import { api } from "~/trpc/client/trpc-client";
 import { ChevronLeftIcon, ChevronRightIcon, SpinnerIcon, UnlockIcon } from "../../components/icons";
 import { Button } from "../../components/ui/button";
-import { cn } from "../../components/ui/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { cn } from "../../lib/utils";
 
 interface Row {
   filename: string;
@@ -50,21 +43,13 @@ const convertDataToRow = async (
   }
 
   // Decrypt shared AES key using RSA private key.
-  const decryptedAesKey = await crypto.subtle.decrypt(
-    { name: "RSA-OAEP" },
-    rsaPrivateKey,
-    stringToUint8Array(atob(item.encrypted_key)),
-  );
+  const decryptedAesKey = await crypto.subtle.decrypt({ name: "RSA-OAEP" }, rsaPrivateKey, stringToUint8Array(atob(item.encrypted_key)));
 
   // Import shared AES key.
   const decryptedAesKeyString = new TextDecoder().decode(new Uint8Array(decryptedAesKey));
-  const aesKey = await crypto.subtle.importKey(
-    "jwk",
-    JSON.parse(decryptedAesKeyString) as JsonWebKey,
-    { name: "AES-CBC" },
-    true,
-    ["decrypt"],
-  );
+  const aesKey = await crypto.subtle.importKey("jwk", JSON.parse(decryptedAesKeyString) as JsonWebKey, { name: "AES-GCM" }, true, [
+    "decrypt",
+  ]);
 
   // Decrypt filename.
   const iv = stringToUint8Array(atob(item.iv));
@@ -89,13 +74,7 @@ export interface Props {
 }
 
 /** @todo option to sort ascending by time and ability to search, once the user has decrypted the file names */
-export const FilesTable: FC<Props> = ({
-  onlySentReceived,
-  rsaPrivateKey,
-  onClickDecryptFilenames,
-  pageSizes,
-  initialPageSize,
-}) => {
+export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClickDecryptFilenames, pageSizes, initialPageSize }) => {
   // Dehydrate data that we fetched on the server in server components higher up the tree
   const queryClient = useQueryClient();
   dehydrate(queryClient);
@@ -185,7 +164,7 @@ export const FilesTable: FC<Props> = ({
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-lg border-b border-gray-200 shadow">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-slate-800">
+                <thead className="bg-muted">
                   {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                       {headerGroup.headers.map((header) => {
@@ -209,7 +188,7 @@ export const FilesTable: FC<Props> = ({
                     </tr>
                   ))}
                 </thead>
-                <tbody className="divide-y divide-slate-800 bg-slate-900">
+                <tbody className="divide-y divide-slate-800 bg-muted">
                   {table.getRowModel().rows.map((row) => {
                     return (
                       <tr key={row.id}>
@@ -218,10 +197,7 @@ export const FilesTable: FC<Props> = ({
                             <td className="w-[50%] whitespace-nowrap text-sm text-slate-300" role="cell" key={cell.id}>
                               <Link
                                 href={`/file/${row.original.slug}`}
-                                className={cn(
-                                  "block h-full w-full px-6 py-4",
-                                  cell.column.id === "filename" && "hover:underline",
-                                )}
+                                className={cn("block h-full w-full px-6 py-4", cell.column.id === "filename" && "hover:underline")}
                               >
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                               </Link>
@@ -244,16 +220,26 @@ export const FilesTable: FC<Props> = ({
           {/* simplified mobile version */}
           <div className="flex flex-1 justify-between sm:hidden">
             <div className="flex gap-2">
-              <Button variant="subtle" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+              <Button
+                variant="secondary"
+                className="border border-border"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
                 Previous
               </Button>
               {!rsaPrivateKey && (
-                <Button variant="outline" onClick={onClickDecryptFilenames}>
+                <Button variant="secondary" className="border border-border" onClick={onClickDecryptFilenames}>
                   <UnlockIcon className="h-5 w-5 text-gray-500" />
                 </Button>
               )}
             </div>
-            <Button variant="subtle" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+            <Button
+              variant="secondary"
+              className="border border-border"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
               Next
             </Button>
           </div>
@@ -273,7 +259,7 @@ export const FilesTable: FC<Props> = ({
                     table.setPageSize(Number(val));
                   }}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px] bg-secondary">
                     <SelectValue placeholder="Select a fruit" />
                   </SelectTrigger>
                   <SelectContent>
@@ -286,7 +272,7 @@ export const FilesTable: FC<Props> = ({
                 </Select>
               </label>
               {!rsaPrivateKey && (
-                <Button variant="outline" onClick={onClickDecryptFilenames}>
+                <Button variant="secondary" className="border border-border" onClick={onClickDecryptFilenames}>
                   <UnlockIcon className="h-5 w-5 text-gray-500" />
                 </Button>
               )}
@@ -295,14 +281,24 @@ export const FilesTable: FC<Props> = ({
               <div>{dataQuery.isFetching ? <SpinnerIcon className="mr-2 h-4 w-4 animate-spin" /> : null}</div>
               <nav className="relative z-0 inline-flex gap-2 -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                 <div className="flex gap-2">
-                  <Button variant="subtle" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                  <Button
+                    variant="secondary"
+                    className="border border-border"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                  >
                     <>
                       <span className="sr-only">Previous</span>
                       <ChevronLeftIcon className="h-5 w-5 text-gray-500" aria-hidden="true" />
                     </>
                   </Button>
                 </div>
-                <Button variant="subtle" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                <Button
+                  variant="secondary"
+                  className="border border-border"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
                   <>
                     <span className="sr-only">Next</span>
                     <ChevronRightIcon className="h-5 w-5 text-gray-500" aria-hidden="true" />

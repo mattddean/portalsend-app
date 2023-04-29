@@ -21,6 +21,7 @@ const deriveKey = async (masterPassword: string, salt: Uint8Array) => {
   );
 
   const derivedKey = await crypto.subtle.deriveKey(
+    // TODO: how many iterations should we be using?
     { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
     masterPasswordAsKey,
     { name: "AES-GCM", length: 256 },
@@ -151,7 +152,7 @@ export const encryptFile = (file: File, importedAesKey: CryptoKey, iv: Uint8Arra
     reader.onload = async () => {
       if (!reader.result || typeof reader.result === "string") return reject("Invalid reader result");
       const buffer = new Uint8Array(reader.result);
-      const encrypted = await crypto.subtle.encrypt({ name: "AES-CBC", iv: iv }, importedAesKey, buffer);
+      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, importedAesKey, buffer);
       const encryptedFileUint8 = new Uint8Array(encrypted);
       return resolve(encryptedFileUint8);
     };
@@ -166,7 +167,7 @@ export const decryptFile = (file: File, sharedAesKey: CryptoKey, iv: Uint8Array)
     reader.onload = async () => {
       if (!reader.result || typeof reader.result === "string") return reject("Invalid reader result");
       const buffer = new Uint8Array(reader.result);
-      const decrypted = await crypto.subtle.decrypt({ name: "AES-CBC", iv }, sharedAesKey, buffer);
+      const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, sharedAesKey, buffer);
       const decryptedFile = new Uint8Array(decrypted);
       return resolve(decryptedFile);
     };
@@ -175,12 +176,12 @@ export const decryptFile = (file: File, sharedAesKey: CryptoKey, iv: Uint8Array)
 
 export const encryptFilename = async (filename: string, aesKey: CryptoKey, iv: Uint8Array) => {
   const buffer = stringToUint8Array(filename);
-  const encryptedFilename = await crypto.subtle.encrypt({ name: "AES-CBC", iv }, aesKey, buffer);
+  const encryptedFilename = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aesKey, buffer);
   return new Uint8Array(encryptedFilename);
 };
 
 export const decryptFilename = async (encryptedFilename: string, aesKey: CryptoKey, iv: Uint8Array) => {
   const buffer = stringToUint8Array(encryptedFilename);
-  const decryptedFilename = await crypto.subtle.decrypt({ name: "AES-CBC", iv }, aesKey, buffer);
+  const decryptedFilename = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, aesKey, buffer);
   return new Uint8Array(decryptedFilename);
 };

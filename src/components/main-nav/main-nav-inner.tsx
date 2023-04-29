@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { FC, forwardRef } from "react";
 import { LogoIcon } from "~/components/icons";
-import { cn } from "~/components/ui/lib/utils";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,6 +12,7 @@ import {
   NavigationMenuTrigger,
 } from "~/components/ui/navigation-menu";
 import { siteConfig } from "~/config/site";
+import { cn } from "~/lib/utils";
 
 const ListItem = forwardRef<React.ElementRef<typeof Link>, React.ComponentPropsWithoutRef<typeof Link>>(
   ({ className, title, children, href, ...props }, _ref) => {
@@ -51,7 +51,7 @@ export const MainNavInner: FC<Props> = ({ user }) => {
           {user && (
             <NavigationMenuItem>
               <NavigationMenuTrigger className="h-9">Files</NavigationMenuTrigger>
-              <NavigationMenuContent>
+              <NavigationMenuContent className="bg-muted">
                 <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                   <li className="row-span-3">
                     <Link href="/" passHref legacyBehavior>

@@ -10,8 +10,6 @@ import { Label } from "~/components/ui/label";
 import { decryptRsaPrivateKey, stringToUint8Array } from "~/lib/key-utils";
 import { api } from "~/trpc/client/trpc-client";
 
-export const runtime = "edge";
-
 export interface Props {
   pageSizes: number[];
   initialPageSize: number;

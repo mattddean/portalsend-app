@@ -1,5 +1,4 @@
 /**
- *
  * This is an example router, you can delete this file and then update `../pages/api/trpc/[trpc].tsx`
  */
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
@@ -29,16 +28,43 @@ const getS3Client = () => {
 };
 
 export const exampleRouter = router({
-  hello: publicProcedure.input(z.object({ name: z.string() })).query(({ input }) => {
-    return `Hello ${input.name}`;
-  }),
+  getSession: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return null;
 
-  random: publicProcedure.input(z.object({ num: z.number() })).mutation(({ input }) => {
-    return Math.floor(Math.random() * 100) / input.num;
-  }),
+    const authenticatedEmail = ctx.user.email;
+    if (!authenticatedEmail) {
+      throw new Error("User does not have an email address set");
+    }
 
-  secret: privateProcedure.query(({ ctx }) => {
-    return `This is top secret - ${ctx.user.name ?? ""}`;
+    const [user] = await db
+      .select({
+        encrypted_private_key: Schema.users.encrypted_private_key,
+        encrypted_private_key_iv: Schema.users.encrypted_private_key_iv,
+        encrypted_private_key_salt: Schema.users.encrypted_private_key_salt,
+        public_key: Schema.users.public_key,
+      })
+      .from(Schema.users)
+      .where(eq(Schema.users.email, authenticatedEmail))
+      .limit(1);
+
+    // TODO: Consider creating a new table called user_keys where all of these can be required, then link that to a user when
+    // they set up their keys. That would avoid this issue where we can't represent that if public_key exists, all keys must exist.
+    const keys =
+      user?.public_key && user.encrypted_private_key_salt && user.encrypted_private_key_iv && user.encrypted_private_key
+        ? {
+            encrypted_private_key: user.encrypted_private_key,
+            encrypted_private_key_iv: user.encrypted_private_key_iv,
+            encrypted_private_key_salt: user.encrypted_private_key_salt,
+            public_key: user.public_key,
+          }
+        : undefined;
+
+    return {
+      id: ctx.user.id,
+      name: ctx.user.name,
+      email: ctx.user.email,
+      keys,
+    };
   }),
 
   signUp: privateProcedure
@@ -67,6 +93,7 @@ export const exampleRouter = router({
         .where(eq(Schema.users.email, authenticatedEmail));
     }),
 
+  /** @todo Remove this and use getSession everywhere instead of this */
   getMyKeys: privateProcedure.query(async ({ ctx }) => {
     const authenticatedEmail = ctx.user.email;
     if (!authenticatedEmail) {

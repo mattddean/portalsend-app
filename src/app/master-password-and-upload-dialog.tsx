@@ -13,8 +13,6 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 
 const CopyFileLink: FC<{ fileLink: string }> = ({ fileLink }) => {
   const [copyIconVisible, setCopyIconVisible] = useState(true);
@@ -58,33 +56,28 @@ const CopyFileLink: FC<{ fileLink: string }> = ({ fileLink }) => {
 };
 
 const MasterPasswordAndUploadDialog: FC<{
-  onSubmitMasterPassword: (password: string) => Promise<unknown>;
   onClickSend: () => unknown | Promise<unknown>;
   submitEnabled?: boolean;
   progressTasks: { text: string; hoverText: string }[];
   fileLink: string | undefined;
   isSendingFile: boolean;
-  finalSendButtonDisabled: boolean;
   onDialogOpenClick: () => Promise<unknown>;
   close: () => unknown;
   dialogOpen: boolean;
   /** an undefined value means that the answer to this question is still loading */
   userHasSetUpKeyPair: boolean | undefined;
 }> = ({
-  onSubmitMasterPassword,
   onClickSend,
   submitEnabled,
   progressTasks,
   fileLink,
   isSendingFile,
-  finalSendButtonDisabled,
   onDialogOpenClick,
   close,
   dialogOpen,
   userHasSetUpKeyPair,
 }) => {
   const [animatedListParentRef] = useAutoAnimate();
-  const [password, setPassword] = useState("");
 
   // Once the user has set up their key pair, encrypt and send the file.
   const initiatedSend = useRef(false);
@@ -110,85 +103,37 @@ const MasterPasswordAndUploadDialog: FC<{
       </Button>
       {/* Is the answer still loading? TODO: maybe skeleton, but we expect this query to always be loaded by the time this modal is opened. */}
       <DialogContent className="sm:max-w-[425px]">
-        {!userHasSetUpKeyPair ? (
-          <DialogHeader>
-            <DialogTitle>Choose master password</DialogTitle>
-            <DialogDescription>
-              <HoverCard>
-                <HoverCardTrigger className="underline-offset-3 cursor-default underline decoration-slate-500 decoration-dashed hover:decoration-slate-400">
-                  Learn more.
-                </HoverCardTrigger>
-                <HoverCardContent>
-                  <p className="text-sm">
-                    From your master password, a key is derived on your device and used to encrypt your RSA key pair.
-                    Whenever your key pair needs to be decrypted, you&rsquo;ll need to provide your master password
-                    again.
-                  </p>
-                </HoverCardContent>
-              </HoverCard>
-            </DialogDescription>
-          </DialogHeader>
-        ) : (
-          <DialogHeader>
-            <DialogTitle>
-              <div className="flex items-center gap-2">
-                Sending
-                {isSendingFile && <SpinnerIcon className="mr-2 h-4 w-4 animate-spin" />}
-              </div>
-            </DialogTitle>
-            <DialogDescription>Your file is encrypted before it ever leaves your device.</DialogDescription>
-          </DialogHeader>
-        )}
+        <DialogHeader>
+          <DialogTitle>
+            <div className="flex items-center gap-2">
+              Sending
+              {isSendingFile && <SpinnerIcon className="mr-2 h-4 w-4 animate-spin" />}
+            </div>
+          </DialogTitle>
+          <DialogDescription>Your file is encrypted before it ever leaves your device.</DialogDescription>
+        </DialogHeader>
 
-        {!userHasSetUpKeyPair ? (
-          <div className="grid gap-4 py-4">
-            <form
-              className="flex flex-col gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void onSubmitMasterPassword(password);
-              }}
-            >
-              <Label htmlFor="password">Password</Label>
-              <div className="flex w-full max-w-sm items-center space-x-2">
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={finalSendButtonDisabled}
-                  className="col-span-3"
-                  autoComplete="new-password"
-                />
-                <Button type="submit" disabled={!password}>
-                  {userHasSetUpKeyPair ? "Unlock" : "Set"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        ) : (
-          <DialogFooter className="flex gap-6 sm:flex-col sm:space-x-0">
-            {progressTasks.length > 0 && (
-              <div className="flex flex-col gap-2" ref={animatedListParentRef}>
-                {progressTasks.map((task) => (
-                  <div className="text-sm text-slate-500 dark:text-slate-400" key={task.text}>
-                    <HoverCard>
-                      <HoverCardTrigger className="underline-offset-3 cursor-default underline decoration-slate-500 decoration-dashed hover:decoration-slate-400">
-                        {task.text}
-                      </HoverCardTrigger>
-                      <HoverCardContent>
-                        <div>
-                          <p className="text-sm">{task.hoverText}</p>
-                        </div>
-                      </HoverCardContent>
-                    </HoverCard>
-                  </div>
-                ))}
-              </div>
-            )}
-            {fileLink && <CopyFileLink fileLink={fileLink} />}
-          </DialogFooter>
-        )}
+        <DialogFooter className="flex gap-6 sm:flex-col sm:space-x-0">
+          {progressTasks.length > 0 && (
+            <div className="flex flex-col gap-2" ref={animatedListParentRef}>
+              {progressTasks.map((task) => (
+                <div className="text-sm text-slate-500 dark:text-slate-400" key={task.text}>
+                  <HoverCard>
+                    <HoverCardTrigger className="underline-offset-3 cursor-default underline decoration-slate-500 decoration-dashed hover:decoration-slate-400">
+                      {task.text}
+                    </HoverCardTrigger>
+                    <HoverCardContent>
+                      <div>
+                        <p className="text-sm">{task.hoverText}</p>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
+              ))}
+            </div>
+          )}
+          {fileLink && <CopyFileLink fileLink={fileLink} />}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
