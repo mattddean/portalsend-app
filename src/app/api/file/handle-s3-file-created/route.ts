@@ -1,6 +1,6 @@
 // import { ConfirmSubscriptionCommand, SNSClient } from "@aws-sdk/client-sns";
-import * as AWSLambda from "aws-lambda";
 import console from "console";
+import { NextRequest } from "next/server";
 import { Resend } from "resend";
 
 function isConfirmSubscription(headers: { "x-amz-sns-message-type": string }) {
@@ -35,11 +35,11 @@ function isConfirmSubscription(headers: { "x-amz-sns-message-type": string }) {
 //   });
 // }
 
-async function handleInternal(event: AWSLambda.SNSEvent) {
+async function handleInternal(event: NextRequest) {
   console.debug("event", JSON.stringify(event, null, 2));
 
-  const record = event.Records[0];
-  if (!record) throw Error();
+  // const record = event.Records[0];
+  // if (!record) throw Error();
 
   // if (isConfirmSubscription()) {
   //   const client = new SNSClient(config);
@@ -53,11 +53,11 @@ async function handleInternal(event: AWSLambda.SNSEvent) {
   //   const response = await client.send(command);
   // }
 
-  const message = event.Records[0]?.Sns.Message;
-  if (!message) throw new Error("No message");
-  const body = JSON.parse(message);
+  // const message = event.Records[0]?.Sns.Message;
+  // if (!message) throw new Error("No message");
+  // const body = JSON.parse(message);
 
-  console.log("Received SNS message", JSON.stringify(body, null, 2));
+  // console.log("Received SNS message", JSON.stringify(body, null, 2));
 
   // TODO: validate message contents
 
@@ -80,7 +80,7 @@ async function handleInternal(event: AWSLambda.SNSEvent) {
  *
  * @todo upstash queue
  */
-async function handle(event: AWSLambda.SNSEvent) {
+async function handle(event: NextRequest) {
   try {
     await handleInternal(event);
   } catch (error) {
