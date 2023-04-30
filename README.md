@@ -27,6 +27,7 @@ Dead simple end-to-end encrypted file sharing for everyone.
 - Store encryption algorithm of stored shared keys and of stored public keys
 - Enforce type imports using eslint
 - t3 env
+- Only allow 5 recipients (frontend recipient email inputs and backend validation)
 
 ### After Launch
 

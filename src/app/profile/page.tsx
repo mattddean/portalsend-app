@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import { LockIcon } from "~/components/icons";
 import SignInButtons from "~/components/sign-in-options";
 import { rsc } from "../../shared/server-rsc/trpc";
-import { ResetPasswordForm } from "./reset-password-form";
+// import { ResetPasswordForm } from "./reset-password-form";
 
 export const runtime = "edge";
 
@@ -49,7 +49,7 @@ const Home: NextPage = async () => {
               </div>
             </div>
 
-            <ResetPasswordForm email={user.email} />
+            {/* <ResetPasswordForm email={user.email} /> */}
           </div>
         </div>
       )}

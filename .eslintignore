@@ -1,4 +1,4 @@
-/next.config.js
+/next.config.mjs
 /src/server/env.js
 /prettier.config.js
 /tailwind.config.cjs

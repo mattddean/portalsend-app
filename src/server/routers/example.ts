@@ -1,7 +1,7 @@
 /**
  * This is an example router, you can delete this file and then update `../pages/api/trpc/[trpc].tsx`
  */
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { createId } from "@paralleldrive/cuid2";
@@ -11,21 +11,8 @@ import { sql } from "drizzle-orm/sql";
 import { z } from "zod";
 import { db } from "~/db/drizzle-db";
 import * as Schema from "~/db/schema";
+import { getS3Client, portalsendFilesS3Bucket } from "~/lib/s3";
 import { privateProcedure, publicProcedure, router } from "../trpc";
-
-const portalsendFilesS3Bucket = "portalsend-app-files";
-
-// TODO: use env object from env.mjs to get environment variables
-
-const getS3Client = () => {
-  return new S3Client({
-    region: process.env.OUR_AWS_REGION,
-    credentials: {
-      accessKeyId: process.env.OUR_AWS_ACCESS_KEY_ID as string,
-      secretAccessKey: process.env.OUR_AWS_SECRET_ACCESS_KEY as string,
-    },
-  });
-};
 
 export const exampleRouter = router({
   getSession: publicProcedure.query(async ({ ctx }) => {
@@ -70,10 +57,12 @@ export const exampleRouter = router({
   signUp: privateProcedure
     .input(
       z.object({
-        publicKey: z.string(),
-        encryptedPrivateKey: z.string(),
-        encryptedPrivateKeyIv: z.string(),
-        encryptedPrivateKeySalt: z.string(),
+        publicKey: z.string().min(1),
+        encryptedPrivateKey: z.string().min(1),
+        encryptedPrivateKeyIv: z.string().min(1),
+        encryptedPrivateKeySalt: z.string().min(1),
+        firstName: z.string().min(1),
+        lastName: z.string().min(1),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -89,6 +78,8 @@ export const exampleRouter = router({
           encrypted_private_key: input.encryptedPrivateKey,
           encrypted_private_key_iv: input.encryptedPrivateKeyIv,
           encrypted_private_key_salt: input.encryptedPrivateKeySalt,
+          first_name: input.firstName,
+          last_name: input.lastName,
         })
         .where(eq(Schema.users.email, authenticatedEmail));
     }),
@@ -126,27 +117,25 @@ export const exampleRouter = router({
     };
   }),
 
-  getPublicKeysForUsers: privateProcedure
-    .input(z.object({ user_emails: z.array(z.string()) }))
-    .mutation(async ({ input }) => {
-      const users = await db
-        .select({
-          email: Schema.users.email,
-          public_key: Schema.users.public_key,
-        })
-        .from(Schema.users)
-        .where(inArray(Schema.users.email, input.user_emails));
+  getPublicKeysForUsers: privateProcedure.input(z.object({ user_emails: z.array(z.string()) })).mutation(async ({ input }) => {
+    const users = await db
+      .select({
+        email: Schema.users.email,
+        public_key: Schema.users.public_key,
+      })
+      .from(Schema.users)
+      .where(inArray(Schema.users.email, input.user_emails));
 
-      const retUsers = [];
-      for (const email of input.user_emails) {
-        const foundUser = users.find((user) => user.email === email);
-        retUsers.push({
-          email,
-          data: foundUser ? { public_key: foundUser.public_key } : undefined,
-        });
-      }
-      return retUsers;
-    }),
+    const retUsers = [];
+    for (const email of input.user_emails) {
+      const foundUser = users.find((user) => user.email === email);
+      retUsers.push({
+        email,
+        data: foundUser ? { public_key: foundUser.public_key } : undefined,
+      });
+    }
+    return retUsers;
+  }),
 
   createSignedUploadUrl: privateProcedure
     .input(

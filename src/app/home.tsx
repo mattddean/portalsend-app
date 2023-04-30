@@ -14,8 +14,8 @@ import { cn } from "~/lib/utils";
 import { api } from "~/trpc/client/trpc-client";
 import { PageTagline } from "../components/page-tagline";
 import { AppRouter } from "../server/routers/_app";
+import { CompleteSignUpDialog } from "./complete-sign-up-dialog";
 import MasterPasswordAndUploadDialog from "./master-password-and-upload-dialog";
-import { SetKeyPairDialog } from "./set-key-pair-dialog";
 
 type PublicKey = {
   email: string;
@@ -265,7 +265,7 @@ const Home: FC<Props> = ({ session }) => {
           {!!fileError && <div>{fileError}</div>}
 
           {userIsSignedInButHasNotGeneratedKeyPair && (
-            <SetKeyPairDialog dialogOpen={masterPasswordDialogOpen} close={() => setMasterPasswordDialogOpen(false)} />
+            <CompleteSignUpDialog dialogOpen={masterPasswordDialogOpen} close={() => setMasterPasswordDialogOpen(false)} />
           )}
 
           {/* Recipient email inputs */}
@@ -281,9 +281,6 @@ const Home: FC<Props> = ({ session }) => {
                         value={recipientEmails[index] ?? ""}
                         onChange={(e) =>
                           setRecipientEmails((emails) => {
-                            if (!e.target) {
-                              throw new Error("No target");
-                            }
                             const copy = [...emails];
                             const newValue = e.target.value;
                             if (newValue === "" && numRecipientEmailInputs > 1) {

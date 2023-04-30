@@ -1,15 +1,4 @@
-import {
-  boolean,
-  datetime,
-  index,
-  int,
-  mysqlEnum,
-  mysqlTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  varchar,
-} from "drizzle-orm/mysql-core";
+import { boolean, datetime, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 export const accounts = mysqlTable(
   "accounts",
@@ -64,6 +53,8 @@ export const users = mysqlTable(
     email: varchar("email", { length: 191 }).notNull(),
     email_verified: timestamp("email_verified"),
     image: varchar("image", { length: 191 }),
+    first_name: varchar("first_name", { length: 191 }).notNull(),
+    last_name: varchar("last_name", { length: 191 }).notNull(),
 
     /** RSA private key exported as JWK, encrypted with AES, then base64 encoded */
     encrypted_private_key: text("encrypted_private_key"),

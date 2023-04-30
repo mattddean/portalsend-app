@@ -8,26 +8,33 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/h
 import { Label } from "~/components/ui/label";
 import { api } from "../trpc/client/trpc-client";
 
-export const SetKeyPairDialog: FC<{
+/**
+ * Ask for the user's name and master password to finish setting up their account.
+ * @todo possible to do this as part of our next-auth sign up page?
+ */
+export const CompleteSignUpDialog: FC<{
   close: () => unknown;
   dialogOpen: boolean;
 }> = ({ close, dialogOpen }) => {
   const utils = api.useContext();
   const signUp = api.example.signUp.useMutation();
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [confirmationPassword, setConfirmationPassword] = useState("");
 
   const generateKeyPairAndSignUp = async (password: string) => {
     const keyPair = await generateRsaKeyPair();
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const encryptedPrivateKey = await encryptRsaPrivateKey(keyPair, password, salt);
-
-    const decodedSalt = arrayBufferToString(salt);
-
+    const saltString = arrayBufferToString(salt);
     await signUp.mutateAsync({
       encryptedPrivateKey: btoa(encryptedPrivateKey.ciphertextString),
       encryptedPrivateKeyIv: btoa(encryptedPrivateKey.ivString),
       publicKey: btoa(await serializeKey(keyPair.publicKey)),
-      encryptedPrivateKeySalt: btoa(decodedSalt),
+      encryptedPrivateKeySalt: btoa(saltString),
+      firstName,
+      lastName,
     });
 
     await utils.example.getMyKeys.invalidate();
@@ -51,10 +58,10 @@ export const SetKeyPairDialog: FC<{
               </HoverCardTrigger>
               <HoverCardContent>
                 <p className="text-sm">
-                  In order to securely send and receive files, we&rsquo;ll generate a key pair for you on your device.
-                  Our zero-knowledge architecture requires that your private key be encrypted with a master password,
-                  which you must provide each time you need to use your private key. This ensures that only you can
-                  access your private key, even though it&rsquo;s stored on our servers.
+                  In order to securely send and receive files, we&rsquo;ll generate a key pair for you on your device. Our zero-knowledge
+                  architecture requires that your private key be encrypted with a master password, which you must provide each time you need
+                  to use your private key. This ensures that only you can access your private key, even though it&rsquo;s stored on our
+                  servers.
                 </p>
               </HoverCardContent>
             </HoverCard>
@@ -69,6 +76,31 @@ export const SetKeyPairDialog: FC<{
               void generateKeyPairAndSignUp(password);
             }}
           >
+            {/* TODO: tell the user that their name will appear in their recipients' emails (maybe even show picture of example email subject). */}
+            <Label htmlFor="password">First Name</Label>
+            <div className="flex w-full max-w-sm items-center space-x-2">
+              <Input
+                id="firstName"
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="col-span-3"
+                autoComplete="given-name"
+              />
+            </div>
+
+            <Label htmlFor="password">Last Name</Label>
+            <div className="flex w-full max-w-sm items-center space-x-2">
+              <Input
+                id="lastName"
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="col-span-3"
+                autoComplete="family-name"
+              />
+            </div>
+
             <Label htmlFor="password">Password</Label>
             <div className="flex w-full max-w-sm items-center space-x-2">
               <Input
@@ -79,10 +111,23 @@ export const SetKeyPairDialog: FC<{
                 className="col-span-3"
                 autoComplete="new-password"
               />
-              <Button type="submit" disabled={!password}>
-                Set
-              </Button>
             </div>
+
+            <Label htmlFor="password">Confirm Password</Label>
+            <div className="flex w-full max-w-sm items-center space-x-2">
+              <Input
+                id="password"
+                type="password"
+                value={confirmationPassword}
+                onChange={(e) => setConfirmationPassword(e.target.value)}
+                className="col-span-3"
+                autoComplete="new-password"
+              />
+            </div>
+
+            <Button type="submit" disabled={!password}>
+              Create Account
+            </Button>
           </form>
         </div>
       </DialogContent>

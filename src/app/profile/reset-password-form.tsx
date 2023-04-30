@@ -20,14 +20,14 @@ export const ResetPasswordForm: FC<Props> = ({ email }) => {
     const keyPair = await generateRsaKeyPair();
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const encryptedPrivateKey = await encryptRsaPrivateKey(keyPair, password, salt);
-
     const decodedSalt = arrayBufferToString(salt);
-
     await signUpMutation.mutateAsync({
       encryptedPrivateKey: btoa(encryptedPrivateKey.ciphertextString),
       encryptedPrivateKeyIv: btoa(encryptedPrivateKey.ivString),
       publicKey: btoa(await serializeKey(keyPair.publicKey)),
       encryptedPrivateKeySalt: btoa(decodedSalt),
+      firstName: "Example",
+      lastName: "Example",
     });
   };
 

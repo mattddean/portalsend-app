@@ -67,6 +67,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-loading-icons": "^1.1.0",
+    "remark-gfm": "^3.0.1",
     "resend": "^0.14.0",
     "set-cookie-parser": "^2.5.1",
     "superjson": "^1.12.2",
@@ -75,11 +76,11 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.114",
     "@cloudflare/next-on-pages": "^0.3.0",
     "@manypkg/cli": "^0.19.2",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.9",
+    "@types/aws-lambda": "^8.10.114",
     "@types/cookie": "^0.5.1",
     "@types/mdx": "^2.0.4",
     "@types/node": "18.8.5",
