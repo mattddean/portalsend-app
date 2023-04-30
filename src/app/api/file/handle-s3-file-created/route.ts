@@ -1,10 +1,11 @@
-// import { ConfirmSubscriptionCommand, SNSClient } from "@aws-sdk/client-sns";
+import { ConfirmSubscriptionCommand, ConfirmSubscriptionCommandInput } from "@aws-sdk/client-sns";
 import console from "console";
 import { NextRequest } from "next/server";
 import { Resend } from "resend";
+import { getSnsClient } from "~/lib/sns";
 
-function isConfirmSubscription(headers: { "x-amz-sns-message-type": string }) {
-  return headers["x-amz-sns-message-type"] === "SubscriptionConfirmation";
+function isConfirmSubscription(headers: Headers) {
+  return headers.get("x-amz-sns-message-type") === "SubscriptionConfirmation";
 }
 
 // function confirmSubscription(
@@ -36,22 +37,27 @@ function isConfirmSubscription(headers: { "x-amz-sns-message-type": string }) {
 // }
 
 async function handleInternal(event: NextRequest) {
-  console.debug("event", JSON.stringify(event, null, 2));
-
   // const record = event.Records[0];
   // if (!record) throw Error();
 
-  // if (isConfirmSubscription()) {
-  //   const client = new SNSClient(config);
-  //   const input = {
-  //     // ConfirmSubscriptionInput
-  //     TopicArn: "STRING_VALUE", // required
-  //     Token: "STRING_VALUE", // required
-  //     AuthenticateOnUnsubscribe: "STRING_VALUE",
-  //   };
-  //   const command = new ConfirmSubscriptionCommand(input);
-  //   const response = await client.send(command);
-  // }
+  if (isConfirmSubscription(event.headers)) {
+    const snsTopicArn = event.headers.get("x-amz-sns-topic-arn");
+    const body = await event.json();
+    const token = body.Token;
+    if (!snsTopicArn || !token) throw new Error("Invalid subscription confirmation request");
+
+    const client = getSnsClient();
+    const input: ConfirmSubscriptionCommandInput = {
+      TopicArn: snsTopicArn,
+      Token: token,
+      AuthenticateOnUnsubscribe: "true",
+    };
+    const command = new ConfirmSubscriptionCommand(input);
+    await client.send(command);
+    return;
+  }
+
+  console.debug("await event.json()", JSON.stringify(await event.json(), null, 2));
 
   // const message = event.Records[0]?.Sns.Message;
   // if (!message) throw new Error("No message");
