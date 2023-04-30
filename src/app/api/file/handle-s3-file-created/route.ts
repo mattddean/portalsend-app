@@ -1,44 +1,44 @@
 import { ConfirmSubscriptionCommand, ConfirmSubscriptionCommandInput } from "@aws-sdk/client-sns";
 import console from "console";
+import { and, eq } from "drizzle-orm/expressions";
 import { NextRequest, NextResponse } from "next/server";
-// import { Resend } from "resend";
+import { Resend } from "resend";
+import { db } from "~/db/drizzle-db";
+import * as Schema from "~/db/schema";
+import { portalsendFilesS3Bucket } from "~/lib/s3";
 import { getSnsClient } from "~/lib/sns";
+
+/** A partial representation of the message we receive from SNS about the file that was created. */
+interface S3PutObjectSnsMessage {
+  Records: [
+    {
+      s3: {
+        bucket: {
+          name: string;
+        };
+        object: {
+          key: string;
+          size: number;
+          eTag: string;
+          sequencer: string;
+        };
+      };
+    },
+  ];
+}
+
+/** A partial representation of the body of the request we receive from SNS. */
+interface SnsRequestBody {
+  Message: string;
+  Signature: string;
+}
 
 function isConfirmSubscription(headers: Headers) {
   return headers.get("x-amz-sns-message-type") === "SubscriptionConfirmation";
 }
 
-// function confirmSubscription(
-//   headers: {
-//     "x-amz-sns-topic-arn": string;
-//     "x-amz-sns-message-type": string;
-//   },
-//   body: { Token: string },
-// ): Promise<string> {
-//   return new Promise((resolve, reject) => {
-//     if (!isConfirmSubscription(headers)) {
-//       return resolve("No SubscriptionConfirmation in sns headers");
-//     }
-
-//     snsInstance.confirmSubscription(
-//       {
-//         TopicArn: headers["x-amz-sns-topic-arn"],
-//         Token: body.Token,
-//       },
-//       (err, res) => {
-//         console.log(err);
-//         if (err) {
-//           return reject(err);
-//         }
-//         return resolve(res.SubscriptionArn);
-//       },
-//     );
-//   });
-// }
-
 async function handleInternal(event: NextRequest) {
-  // const record = event.Records[0];
-  // if (!record) throw Error();
+  // TODO: verify SNS signature
 
   if (isConfirmSubscription(event.headers)) {
     const snsTopicArn = event.headers.get("x-amz-sns-topic-arn");
@@ -58,32 +58,55 @@ async function handleInternal(event: NextRequest) {
     return NextResponse.json({});
   }
 
-  console.debug("await event.json()", JSON.stringify(await event.json(), null, 2));
+  const body = (await event.json()) as SnsRequestBody;
+  const message = JSON.parse(body.Message) as S3PutObjectSnsMessage;
 
-  const body = (await event.json()) as { Message: string; Signature: string };
-  const message = JSON.parse(body.Message) as { Service: string; Event: string };
+  const bucket = message.Records[0].s3.bucket.name;
+  if (bucket !== portalsendFilesS3Bucket) throw new Error("Unexpected bucket");
 
-  console.debug("message", message);
+  // Find all users with access to this file but who are not the original sender.
+  // TODO: if we start allowing users to change recipients, this won't work anymore because
+  // we'll send another email to each recipient each time new recipients are added to a file.
+  const storageKey = message.Records[0].s3.object.key;
+  const results = await db
+    .select({
+      user_email: Schema.users.email,
+      user_first_name: Schema.users.first_name,
+      file_slug: Schema.files.slug,
+      original_sender: Schema.fileAccesses.original_sender,
+    })
+    .from(Schema.files)
+    .innerJoin(Schema.fileAccesses, eq(Schema.fileAccesses.file_id, Schema.files.id))
+    .innerJoin(Schema.users, eq(Schema.users.id, Schema.fileAccesses.user_id))
+    .where(
+      and(
+        // Find the file by its s3 key
+        eq(Schema.files.storage_key, storageKey),
+        // find users who were given access to this file but who are not the original sender
+        // eq(Schema.fileAccesses.original_sender, false),
+      ),
+    );
+  const slug = results[0]?.file_slug;
 
-  // const message = event.Records[0]?.Sns.Message;
-  // if (!message) throw new Error("No message");
-  // const body = JSON.parse(message);
+  const fileSender = results.find((result) => result.original_sender === true);
+  if (!fileSender) throw new Error("Cannot determine file's sender");
 
-  // console.log("Received SNS message", JSON.stringify(body, null, 2));
+  const recipients = results.filter((result) => result.original_sender === false);
 
-  // TODO: validate message contents
-
+  // Send an email to all of the file's recipients.
   const resendApiKey = process.env.RESEND_API_KEY as string;
-
-  // const resend = new Resend(resendApiKey);
-
-  // const result = await resend.sendEmail({
-  //   from: "onboarding@resend.dev",
-  //   to: "mdean400@gmail.com",
-  //   subject: "Hello World",
-  //   html: "Congrats on sending your <strong>first email</strong>!",
-  // });
-  // console.log("Sent email", JSON.stringify(result, null, 2));
+  const resend = new Resend(resendApiKey);
+  const result = await resend.sendEmail({
+    from: "no-reply@notifications.portalsend.app",
+    // The `to` array can contain 50 recipients max, but we only allow 5 recipients per file for now, so we don't need to worry about exceeding that.
+    // In the event that this changes, we can just use a loop to send to all recipients.
+    to: recipients.map((recipient) => recipient.user_email),
+    // TODO: Consider including last name, but that may be weird
+    subject: `${fileSender.user_first_name} shared a file with you`,
+    // TODO: Use react instead
+    html: `Someone shared a file with you.<br/>Visit <a href="${slug}">${slug}</a> to download it.`,
+  });
+  console.debug("Sent emails", JSON.stringify(result, null, 2));
 
   return NextResponse.json({});
 }
@@ -92,6 +115,7 @@ async function handleInternal(event: NextRequest) {
  * Send email to recipients on creation of S3 file.
  *
  * @todo upstash queue
+ * @todo verify sns signature
  */
 async function handle(event: NextRequest) {
   let response: NextResponse;
@@ -107,4 +131,4 @@ async function handle(event: NextRequest) {
   return response;
 }
 
-export { handle as GET, handle as POST, handle as PUT };
+export { handle as POST };
