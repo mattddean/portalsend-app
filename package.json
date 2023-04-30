@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@8.3.1",
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -13,6 +13,7 @@
   "dependencies": {
     "@auth/core": "0.7.0",
     "@aws-sdk/client-s3": "^3.289.0",
+    "@aws-sdk/client-sns": "^3.321.1",
     "@aws-sdk/middleware-endpoint": "^3.289.0",
     "@aws-sdk/s3-presigned-post": "^3.289.0",
     "@aws-sdk/s3-request-presigner": "^3.289.0",
@@ -66,6 +67,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-loading-icons": "^1.1.0",
+    "resend": "^0.14.0",
     "set-cookie-parser": "^2.5.1",
     "superjson": "^1.12.2",
     "tailwind-merge": "^1.9.1",
@@ -73,6 +75,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.114",
     "@cloudflare/next-on-pages": "^0.3.0",
     "@manypkg/cli": "^0.19.2",
     "@tailwindcss/forms": "^0.5.3",

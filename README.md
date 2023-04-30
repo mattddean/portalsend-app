@@ -26,6 +26,7 @@ Dead simple end-to-end encrypted file sharing for everyone.
 - Use crystals-kyber: https://github.com/antontutoveanu/crystals-kyber-javascript
 - Store encryption algorithm of stored shared keys and of stored public keys
 - Enforce type imports using eslint
+- t3 env
 
 ### After Launch
 
