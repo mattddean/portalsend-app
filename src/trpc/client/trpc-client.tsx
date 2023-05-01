@@ -5,6 +5,7 @@ import { httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { useState } from "react";
 import superjson from "superjson";
+import { env } from "~/env.mjs";
 import type { AppRouter } from "~/server/routers/_app";
 
 export const api = createTRPCReact<AppRouter>({
@@ -22,14 +23,14 @@ function getBaseUrl() {
   if (typeof window !== "undefined")
     // browser should use relative path
     return "";
-  if (process.env.VERCEL_URL)
+  if (env.VERCEL_URL)
     // reference for vercel.com
-    return `https://${process.env.VERCEL_URL}`;
-  if (process.env.RENDER_INTERNAL_HOSTNAME)
+    return `https://${env.VERCEL_URL}`;
+  if (env.RENDER_INTERNAL_HOSTNAME)
     // reference for render.com
-    return `http://${process.env.RENDER_INTERNAL_HOSTNAME}:${process.env.PORT}`;
+    return `http://${env.RENDER_INTERNAL_HOSTNAME}:${env.PORT}`;
   // assume localhost
-  return `http://localhost:${process.env.PORT ?? 3000}`;
+  return `http://localhost:${env.PORT ?? 3000}`;
 }
 
 export function ClientProvider(props: { children: React.ReactNode }) {

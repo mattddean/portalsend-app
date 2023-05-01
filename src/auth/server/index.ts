@@ -4,6 +4,7 @@ import { Auth } from "@auth/core";
 import type { AuthAction, AuthConfig, Session } from "@auth/core/types";
 import { serialize } from "cookie";
 import { parseString, splitCookiesString, type Cookie } from "set-cookie-parser";
+import { env } from "~/env.mjs";
 
 export interface SolidAuthConfig extends AuthConfig {
   /**
@@ -13,16 +14,7 @@ export interface SolidAuthConfig extends AuthConfig {
   prefix?: string;
 }
 
-const actions: AuthAction[] = [
-  "providers",
-  "session",
-  "csrf",
-  "signin",
-  "signout",
-  "callback",
-  "verify-request",
-  "error",
-];
+const actions: AuthAction[] = ["providers", "session", "csrf", "signin", "signout", "callback", "verify-request", "error"];
 
 // currently multiple cookies are not supported, so we keep the next-auth.pkce.code_verifier cookie for now:
 // because it gets updated anyways
@@ -63,7 +55,7 @@ export async function SolidAuthHandler(request: Request, prefix: string, authOpt
 }
 
 export async function getSession(req: Request, options: AuthConfig): Promise<Session | null> {
-  options.secret ??= process.env.AUTH_SECRET;
+  options.secret ??= env.AUTH_SECRET;
   options.trustHost ??= true;
 
   const url = new URL("/api/auth/session", req.url);

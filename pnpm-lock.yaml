@@ -90,6 +90,9 @@ dependencies:
   '@radix-ui/react-tooltip':
     specifier: ^1.0.5
     version: 1.0.5(@types/react@18.0.21)(react-dom@18.2.0)(react@18.2.0)
+  '@t3-oss/env-nextjs':
+    specifier: ^0.2.2
+    version: 0.2.2(zod@3.21.4)
   '@tailwindcss/line-clamp':
     specifier: ^0.4.2
     version: 0.4.2(tailwindcss@3.2.7)
@@ -100,8 +103,8 @@ dependencies:
     specifier: 4.14.5
     version: 4.14.5(patch_hash=ofxwhsft6yhbqzmuaz6xnxhbqi)(react-dom@18.2.0)(react@18.2.0)
   '@tanstack/react-query-devtools':
-    specifier: 4.26.1
-    version: 4.26.1(@tanstack/react-query@4.14.5)(react-dom@18.2.0)(react@18.2.0)
+    specifier: 4.14.5
+    version: 4.14.5(@tanstack/react-query@4.14.5)(react-dom@18.2.0)(react@18.2.0)
   '@tanstack/react-table':
     specifier: ^8.7.9
     version: 8.7.9(react-dom@18.2.0)(react@18.2.0)
@@ -118,8 +121,8 @@ dependencies:
     specifier: ^6.0.3
     version: 6.0.3
   class-variance-authority:
-    specifier: ^0.4.0
-    version: 0.4.0(typescript@5.1.0-beta)
+    specifier: ^0.6.0
+    version: 0.6.0(typescript@5.1.0-beta)
   clsx:
     specifier: ^1.2.1
     version: 1.2.1
@@ -209,6 +212,9 @@ devDependencies:
   '@tailwindcss/typography':
     specifier: ^0.5.9
     version: 0.5.9(tailwindcss@3.2.7)
+  '@total-typescript/ts-reset':
+    specifier: ^0.4.2
+    version: 0.4.2
   '@types/aws-lambda':
     specifier: ^8.10.114
     version: 8.10.114
@@ -221,6 +227,9 @@ devDependencies:
   '@types/node':
     specifier: 18.8.5
     version: 18.8.5
+  '@types/prettier':
+    specifier: ^2.7.2
+    version: 2.7.2
   '@types/react':
     specifier: 18.0.21
     version: 18.0.21
@@ -4836,6 +4845,23 @@ packages:
       defer-to-connect: 2.0.1
     dev: true
 
+  /@t3-oss/env-core@0.2.2(zod@3.21.4):
+    resolution: {integrity: sha512-Jiuph14/L3L9EDaU0O0YiLeaKUcWA9c3mWYuKem8+L64i3Iwz+IbKdl5Jp4cx+JbOsS/aptwGZplnxSHhm2gMQ==}
+    peerDependencies:
+      zod: ^3.0.0
+    dependencies:
+      zod: 3.21.4
+    dev: false
+
+  /@t3-oss/env-nextjs@0.2.2(zod@3.21.4):
+    resolution: {integrity: sha512-9LnVpTkf/8WkggyVN6Liz9Ma9a7fLzV00b5BngWj3HI3iWDfddsWaqCf/H0f46Bgu29NubP3Bwajf1JieVrxFA==}
+    peerDependencies:
+      zod: ^3.0.0
+    dependencies:
+      '@t3-oss/env-core': 0.2.2(zod@3.21.4)
+      zod: 3.21.4
+    dev: false
+
   /@tailwindcss/forms@0.5.3(tailwindcss@3.2.7):
     resolution: {integrity: sha512-y5mb86JUoiUgBjY/o6FJSFZSEttfb3Q5gllE4xoKjAAD+vBrnIhE4dViwUuow3va8mpH4s9jyUbUbrRGoRdc2Q==}
     peerDependencies:
@@ -4876,10 +4902,10 @@ packages:
     resolution: {integrity: sha512-Su1AyrPb6xnm7wXTvpN5tt+B7LViYSh9k04vvuc6+eMVH0HkE9ktZTXibRrTvV83BI1KP5MG7v/k90ne/4zQzw==}
     dev: false
 
-  /@tanstack/react-query-devtools@4.26.1(@tanstack/react-query@4.14.5)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-ts2mA+fyFYFRi3Cee4xBk8Fx6waSFOM+yCkFqwJfGQRGjjTIMYMZPJv4wkv7vy12IVi1SYhL8au22LRKlXS1Zg==}
+  /@tanstack/react-query-devtools@4.14.5(@tanstack/react-query@4.14.5)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-LQqHRWdOh3DcWUa3oPjp7qqbIKfAZo3eu4NYmEEiWvV7CKuEDWCEGDEofdqHsvUJVk6LPQ3wCEaZB+fA4HaYvg==}
     peerDependencies:
-      '@tanstack/react-query': 4.26.1
+      '@tanstack/react-query': 4.14.5
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
@@ -4930,6 +4956,10 @@ packages:
   /@tootallnate/once@1.1.2:
     resolution: {integrity: sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==}
     engines: {node: '>= 6'}
+    dev: true
+
+  /@total-typescript/ts-reset@0.4.2:
+    resolution: {integrity: sha512-vqd7ZUDSrXFVT1n8b2kc3LnklncDQFPvR58yUS1kEP23/nHPAO9l1lMjUfnPrXYYk4Hj54rrLKMW5ipwk7k09A==}
     dev: true
 
   /@trpc/client@10.0.0-rc.1(@trpc/server@10.0.0-rc.1):
@@ -5106,6 +5136,10 @@ packages:
 
   /@types/node@18.8.5:
     resolution: {integrity: sha512-Bq7G3AErwe5A/Zki5fdD3O6+0zDChhg671NfPjtIcbtzDNZTv4NPKMRFr7gtYPG7y+B8uTiNK4Ngd9T0FTar6Q==}
+
+  /@types/prettier@2.7.2:
+    resolution: {integrity: sha512-KufADq8uQqo1pYKVIYzfKbJfBAc0sOeXqGbFaSpv8MRmC/zXgowNZmFcbngndGk922QDmOASEXUZCaY48gs4cg==}
+    dev: true
 
   /@types/prop-types@15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
@@ -6300,14 +6334,15 @@ packages:
     engines: {node: '>=6.0'}
     dev: false
 
-  /class-variance-authority@0.4.0(typescript@5.1.0-beta):
-    resolution: {integrity: sha512-74enNN8O9ZNieycac/y8FxqgyzZhZbxmCitAtAeUrLPlxjSd5zA7LfpprmxEcOmQBnaGs5hYhiSGnJ0mqrtBLQ==}
+  /class-variance-authority@0.6.0(typescript@5.1.0-beta):
+    resolution: {integrity: sha512-qdRDgfjx3GRb9fpwpSvn+YaidnT7IUJNe4wt5/SWwM+PmUwJUhQRk/8zAyNro0PmVfmen2635UboTjIBXXxy5A==}
     peerDependencies:
-      typescript: '>= 4.5.5 < 5'
+      typescript: '>= 4.5.5 < 6'
     peerDependenciesMeta:
       typescript:
         optional: true
     dependencies:
+      clsx: 1.2.1
       typescript: 5.1.0-beta
     dev: false
 

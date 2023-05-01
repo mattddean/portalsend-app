@@ -53,8 +53,8 @@ export const users = mysqlTable(
     email: varchar("email", { length: 191 }).notNull(),
     email_verified: timestamp("email_verified"),
     image: varchar("image", { length: 191 }),
-    first_name: varchar("first_name", { length: 191 }).notNull(),
-    last_name: varchar("last_name", { length: 191 }).notNull(),
+    first_name: varchar("first_name", { length: 191 }),
+    last_name: varchar("last_name", { length: 191 }),
 
     /** RSA private key exported as JWK, encrypted with AES, then base64 encoded */
     encrypted_private_key: text("encrypted_private_key"),

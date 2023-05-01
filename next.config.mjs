@@ -1,5 +1,9 @@
+// validate environment variables on build
+import "./src/env.mjs";
+
 import mdx from "@next/mdx";
 import remarkGfm from "remark-gfm";
+import { env } from "~/env.mjs";
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
@@ -8,8 +12,8 @@ const nextConfig = {
     appDir: true,
     typedRoutes: true,
   },
-  eslint: { ignoreDuringBuilds: !!process.env.CI },
-  typescript: { ignoreBuildErrors: !!process.env.CI },
+  eslint: { ignoreDuringBuilds: !!env.CI },
+  typescript: { ignoreBuildErrors: !!env.CI },
 };
 
 const withMdx = mdx({

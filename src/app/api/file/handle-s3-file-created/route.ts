@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { db } from "~/db/drizzle-db";
 import * as Schema from "~/db/schema";
+import { env } from "~/env.mjs";
 import { portalsendFilesS3Bucket } from "~/lib/s3";
 import { getSnsClient } from "~/lib/sns";
 
@@ -94,7 +95,7 @@ async function handleInternal(event: NextRequest) {
   const recipients = results.filter((result) => result.original_sender === false);
 
   // Send an email to all of the file's recipients.
-  const resendApiKey = process.env.RESEND_API_KEY as string;
+  const resendApiKey = env.RESEND_API_KEY;
   const resend = new Resend(resendApiKey);
   const result = await resend.sendEmail({
     from: "no-reply@notifications.portalsend.app",

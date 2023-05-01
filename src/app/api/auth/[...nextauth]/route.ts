@@ -1,18 +1,15 @@
 import { NextRequest } from "next/server";
 import { authConfig } from "~/auth/options";
 import { SolidAuthHandler } from "~/auth/server";
+import { env } from "~/env.mjs";
 
 export const runtime = "edge";
 
 async function handler(request: NextRequest) {
   const { prefix = "/api/auth", ...authOptions } = authConfig;
 
-  authOptions.secret ??= process.env.AUTH_SECRET;
-  authOptions.trustHost ??= !!(
-    process.env.AUTH_TRUST_HOST ??
-    process.env.VERCEL ??
-    process.env.NODE_ENV !== "production"
-  );
+  authOptions.secret ??= env.AUTH_SECRET;
+  authOptions.trustHost ??= !!(env.AUTH_TRUST_HOST ?? env.VERCEL ?? env.NODE_ENV !== "production");
 
   // Create a new request so that we can ensure the next headers are accessed in this file.
   // If we pass the request we get from next to SolidAuthHandler, it will access the headers

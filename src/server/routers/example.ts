@@ -11,6 +11,7 @@ import { sql } from "drizzle-orm/sql";
 import { z } from "zod";
 import { db } from "~/db/drizzle-db";
 import * as Schema from "~/db/schema";
+import { env } from "~/env.mjs";
 import { getS3Client, portalsendFilesS3Bucket } from "~/lib/s3";
 import { privateProcedure, publicProcedure, router } from "../trpc";
 
@@ -213,7 +214,7 @@ export const exampleRouter = router({
 
       // Add a one megabyte buffer in case the encrypted version of the file is a bit longer than the unencrypted version.
       const ONE_MEGABYTE_BYTES = 1_000_000;
-      const maxFileSizeBytes = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_BYTES as string) + ONE_MEGABYTE_BYTES;
+      const maxFileSizeBytes = Number(env.NEXT_PUBLIC_MAX_FILE_SIZE_BYTES as string) + ONE_MEGABYTE_BYTES;
 
       const client = getS3Client();
       const { url, fields } = await createPresignedPost(client, {

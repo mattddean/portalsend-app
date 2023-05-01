@@ -9,6 +9,7 @@ import SignInButtons from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { env } from "~/env.mjs";
 import { arrayBufferToString, encryptAesKey, encryptFile, encryptFilename } from "~/lib/key-utils";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/client/trpc-client";
@@ -120,7 +121,7 @@ const Home: FC<Props> = ({ session }) => {
   const file = files[0];
   if (file) {
     const fileSizeBytes = file.size;
-    const maxFileSizeBytes = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_BYTES);
+    const maxFileSizeBytes = Number(env.NEXT_PUBLIC_MAX_FILE_SIZE_BYTES);
     if (fileSizeBytes > maxFileSizeBytes) {
       fileError = `File exceeds ${maxFileSizeBytes / 1e6} MB limit.`;
     }
