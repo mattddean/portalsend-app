@@ -53,7 +53,9 @@ export default async function RootLayout(props: PropsWithChildren) {
       >
         <ClientProvider>
           <ThemeProvider attribute="class" defaultTheme="dark">
-            <div className="flex min-h-screen flex-col">
+            <div className="absolute top-0 bottom-0 left-0 right-0 z-0 h-full w-full flex-1 items-center bg-gradient-to-b from-radish to-background"></div>
+            <div className="background-lines"></div>
+            <div className="relative z-10 flex min-h-screen flex-col">
               <header className="sticky top-0 z-40 w-full border-b border-b-border bg-white dark:border-b-border dark:bg-background">
                 <div className="container flex h-16 items-center">
                   <MainNav />
@@ -67,7 +69,7 @@ export default async function RootLayout(props: PropsWithChildren) {
                 </div>
               </header>
 
-              <main className="flex-1 items-center bg-gradient-to-b from-radish to-background text-white">
+              <main className="flex-1 items-center bg-transparent text-white">
                 <div className="container mt-12 flex flex-col items-center justify-center">
                   <h1 className="text-6xl font-extrabold tracking-tight sm:text-[7rem]">
                     <span className="font-tourney font-semibold italic text-accent-foreground">Portalsend</span>
