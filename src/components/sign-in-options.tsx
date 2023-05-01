@@ -5,7 +5,7 @@ import { signIn } from "~/auth/client";
 import { GithubIcon, GoogleIcon } from "./icons";
 import { Button } from "./ui/button";
 
-const SignInButtons: FC = () => {
+export const SignInButtons: FC = () => {
   return (
     <div className="flex gap-2">
       <Button
@@ -29,5 +29,3 @@ const SignInButtons: FC = () => {
     </div>
   );
 };
-
-export default SignInButtons;

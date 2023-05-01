@@ -1,6 +1,6 @@
 import { type FC } from "react";
 import { PageTagline } from "~/components/page-tagline";
-import SignInButtons from "~/components/sign-in-options";
+import { SignInButtons } from "~/components/sign-in-options";
 import { rsc } from "~/shared/server-rsc/trpc";
 import { HydrateClient } from "~/trpc/client/hydrate-client";
 import { InnerPage } from "../inner-page";

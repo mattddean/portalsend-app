@@ -94,6 +94,8 @@ async function handleInternal(event: NextRequest) {
 
   const recipients = results.filter((result) => result.original_sender === false);
 
+  const fileLink = `https://portalsend.app/file/${slug}`;
+
   // Send an email to all of the file's recipients.
   const resendApiKey = env.RESEND_API_KEY;
   const resend = new Resend(resendApiKey);
@@ -105,7 +107,7 @@ async function handleInternal(event: NextRequest) {
     // TODO: Consider including last name, but that may be weird
     subject: `${fileSender.user_first_name} shared a file with you`,
     // TODO: Use react instead
-    html: `Someone shared a file with you.<br/>Visit <a href="${slug}">${slug}</a> to download it.`,
+    html: `Visit <a href="${fileLink}">${fileLink}</a> to download it.`,
   });
   console.debug("Sent emails", JSON.stringify(result, null, 2));
 

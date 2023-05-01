@@ -1,7 +1,7 @@
 "use client";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useRef, useState } from "react";
 import { CheckIcon, CopyIcon, SpinnerIcon } from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog";
@@ -17,7 +17,7 @@ const CopyFileLink: FC<{ fileLink: string }> = ({ fileLink }) => {
   };
 
   const cooldown = useRef(false);
-  const handleCommandClick = () => {
+  const handleCopyClick = () => {
     if (cooldown.current === false) {
       cooldown.current = true;
       void navigator.clipboard.writeText(fileLink);
@@ -36,7 +36,7 @@ const CopyFileLink: FC<{ fileLink: string }> = ({ fileLink }) => {
         <button
           className="relative flex cursor-pointer flex-row items-center gap-2 rounded-md border border-purple-200/20 bg-purple-100/10 px-3 py-2 text-xs text-slate-500 transition-colors duration-300 hover:border-purple-300/50 hover:bg-purple-100/20 dark:text-slate-400"
           title="Copy your file link"
-          onClick={handleCommandClick}
+          onClick={handleCopyClick}
         >
           <span>{fileLink}</span>
           <CopyIcon className={!copyIconVisible ? "hidden" : ""} size={18} />
@@ -48,8 +48,7 @@ const CopyFileLink: FC<{ fileLink: string }> = ({ fileLink }) => {
   );
 };
 
-const MasterPasswordAndUploadDialog: FC<{
-  onClickSend: () => unknown | Promise<unknown>;
+export const UploadDialog: FC<{
   submitEnabled?: boolean;
   progressTasks: { text: string; hoverText: string }[];
   fileLink: string | undefined;
@@ -57,32 +56,8 @@ const MasterPasswordAndUploadDialog: FC<{
   onDialogOpenClick: () => Promise<unknown>;
   close: () => unknown;
   dialogOpen: boolean;
-  /** an undefined value means that the answer to this question is still loading */
-  userHasSetUpKeyPair: boolean | undefined;
-}> = ({
-  onClickSend,
-  submitEnabled,
-  progressTasks,
-  fileLink,
-  isSendingFile,
-  onDialogOpenClick,
-  close,
-  dialogOpen,
-  userHasSetUpKeyPair,
-}) => {
+}> = ({ submitEnabled, progressTasks, fileLink, isSendingFile, onDialogOpenClick, close, dialogOpen }) => {
   const [animatedListParentRef] = useAutoAnimate();
-
-  // Once the user has set up their key pair, encrypt and send the file.
-  const initiatedSend = useRef(false);
-  useEffect(() => {
-    const asyncFn = async () => {
-      if (userHasSetUpKeyPair && !initiatedSend.current && dialogOpen) {
-        initiatedSend.current = true;
-        await onClickSend();
-      }
-    };
-    asyncFn().catch(console.error);
-  }, [dialogOpen, onClickSend, userHasSetUpKeyPair]);
 
   return (
     <Dialog
@@ -131,5 +106,3 @@ const MasterPasswordAndUploadDialog: FC<{
     </Dialog>
   );
 };
-
-export default MasterPasswordAndUploadDialog;

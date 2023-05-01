@@ -4,16 +4,10 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { NextPage } from "next";
 import { FC, useReducer, useState } from "react";
 import { Grid } from "react-loading-icons";
-import SignInButtons from "~/components/sign-in-options";
+import { PageTagline } from "~/components/page-tagline";
+import { SignInButtons } from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -286,7 +280,7 @@ const FileSlug: NextPage<Props> = ({ params }) => {
 
       {!!user.data && (
         <div className="flex w-full flex-col items-center gap-8">
-          <div className="text-center text-sm text-blue-100">Download and decrypt the file.</div>
+          <PageTagline text="Download and decrypt the file." />
           <div>
             {getFileQuery.data && (
               <div className="w-full max-w-[200px]">

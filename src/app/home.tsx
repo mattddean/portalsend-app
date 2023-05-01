@@ -5,7 +5,7 @@ import { inferRouterOutputs } from "@trpc/server";
 import { FC, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AlertTriangleIcon } from "~/components/icons";
-import SignInButtons from "~/components/sign-in-options";
+import { SignInButtons } from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
@@ -15,8 +15,8 @@ import { cn } from "~/lib/utils";
 import { api } from "~/trpc/client/trpc-client";
 import { PageTagline } from "../components/page-tagline";
 import { AppRouter } from "../server/routers/_app";
-import { CompleteSignUpDialog } from "./complete-sign-up-dialog";
-import MasterPasswordAndUploadDialog from "./master-password-and-upload-dialog";
+import { FinishSignUpDialog } from "./finish-sign-up-dialog";
+import { UploadDialog } from "./upload-dialog";
 
 type PublicKey = {
   email: string;
@@ -88,7 +88,6 @@ const Home: FC<Props> = ({ session }) => {
   const [masterPasswordDialogOpen, setMasterPasswordDialogOpen] = useState(userIsSignedInButHasNotGeneratedKeyPair);
 
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
-  const [publicKeysForRecipients, setPublicKeysForRecipients] = useState<PublicKey[]>([]);
 
   const [recipientListAnimateRef] = useAutoAnimate();
 
@@ -114,7 +113,7 @@ const Home: FC<Props> = ({ session }) => {
     if (usersNotSetUp.length > 0) return;
 
     setPasswordDialogOpen(true);
-    setPublicKeysForRecipients(publicKeys);
+    await handleEncryptClick(publicKeys);
   };
 
   let fileError: string | undefined;
@@ -127,7 +126,7 @@ const Home: FC<Props> = ({ session }) => {
     }
   }
 
-  const handleEncryptClick = async () => {
+  const handleEncryptClick = async (recipientPublicKeys: PublicKey[]) => {
     setIsSendingFile(true);
 
     if (!file) {
@@ -144,7 +143,9 @@ const Home: FC<Props> = ({ session }) => {
       throw new Error("Own email is missing");
     }
     const myPublicKey = session.keys?.public_key;
-    if (!myPublicKey || publicKeysForRecipients.length < 1) {
+    console.debug("mypublickey", myPublicKey);
+    console.debug("recipientPublicKeys", recipientPublicKeys);
+    if (!myPublicKey || recipientPublicKeys.length < 1) {
       // The UI should have prevented us from getting here.
       throw new Error("Public key(s) are missing");
     }
@@ -170,8 +171,8 @@ const Home: FC<Props> = ({ session }) => {
     ]);
     const encryptedAesKeyPromises = [];
     const usersNotSetUp = [];
-    for (let i = 0; i < publicKeysForRecipients.length; i++) {
-      const key = publicKeysForRecipients[i];
+    for (let i = 0; i < recipientPublicKeys.length; i++) {
+      const key = recipientPublicKeys[i];
       if (!key?.email || !key?.data?.public_key) {
         usersNotSetUp.push(i);
         continue;
@@ -266,7 +267,7 @@ const Home: FC<Props> = ({ session }) => {
           {!!fileError && <div>{fileError}</div>}
 
           {userIsSignedInButHasNotGeneratedKeyPair && (
-            <CompleteSignUpDialog dialogOpen={masterPasswordDialogOpen} close={() => setMasterPasswordDialogOpen(false)} />
+            <FinishSignUpDialog dialogOpen={masterPasswordDialogOpen} close={() => setMasterPasswordDialogOpen(false)} />
           )}
 
           <div className="flex w-full flex-col gap-4">
@@ -352,8 +353,7 @@ const Home: FC<Props> = ({ session }) => {
             {/* Send button which spawns master password and upload dialog */}
             {!!file && (
               <div>
-                <MasterPasswordAndUploadDialog
-                  onClickSend={handleEncryptClick}
+                <UploadDialog
                   submitEnabled={recipientEmails.length > 0}
                   progressTasks={progressTasks}
                   fileLink={linkToFile}
@@ -361,7 +361,6 @@ const Home: FC<Props> = ({ session }) => {
                   onDialogOpenClick={onDialogOpenClick}
                   dialogOpen={passwordDialogOpen}
                   close={() => setPasswordDialogOpen(false)}
-                  userHasSetUpKeyPair={!!session?.keys?.public_key}
                 />
               </div>
             )}

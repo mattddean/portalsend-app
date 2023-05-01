@@ -6,22 +6,22 @@ Dead simple end-to-end encrypted file sharing for everyone.
 
 ### Blocking Launch
 
+- Bug: cannot send a file immediately on signing up because the session does not contain the keys. Maybe just run a getMyKeys for now.
+  Unsure why invalidating getSession does not work. Probably something to do with rsc and react-query. Debug with react-query dev tools.
+- Invite Functionality (send email to destination user when user clicks "Invite")
 - Impose a 7-day file limit and also tell users about it
   - In email
   - On file page
   - On other page
 - Fix privacy policy receive information from third parties, because we receive information from github/google/etc.
-- Remove the close button from the Choose master password dialog.
-- Disable send button when there is a bad email in the bunch.
 - Store the IP Address of each user so that we can identify problem users in the future (does this require a privacy policy?)
-- Improve SEO.
 - Have users agree to Privacy Policy when signing up. And make sure they're above 18.
 - Implement contact form based on privacy policy.
 - Block users outside of US for now.
 - Use crystals-kyber: https://github.com/antontutoveanu/crystals-kyber-javascript
 - Store encryption algorithm of stored shared keys and of stored public keys
-- Enforce type imports using eslint
 - Only allow 5 recipients (frontend recipient email inputs and backend validation)
+- No google fonts
 
 ### After Launch
 
@@ -54,3 +54,5 @@ Dead simple end-to-end encrypted file sharing for everyone.
 - Show error messages when files fail to be decrypted or whatever. Indicate when teh problem is that the master password is wrong.
   Can start by just showing an X on the step that failed and checks on the steps that succeed.
 - More server components and fewer client-side requests.
+- Deep dive into SEO.
+- Get eslint rules from t3-app-router-drizzle

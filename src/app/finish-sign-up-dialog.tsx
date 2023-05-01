@@ -12,7 +12,7 @@ import { api } from "../trpc/client/trpc-client";
  * Non-dismissable. Annoying, but necessary until we come up with a better sign up flow.
  * @todo possible to do this as part of our next-auth sign up page?
  */
-export const CompleteSignUpDialog: FC<{
+export const FinishSignUpDialog: FC<{
   close: () => unknown;
   dialogOpen: boolean;
 }> = ({ close, dialogOpen }) => {
@@ -43,6 +43,7 @@ export const CompleteSignUpDialog: FC<{
     });
 
     await utils.example.getMyKeys.invalidate();
+    await utils.example.getSession.invalidate();
 
     close();
   };
