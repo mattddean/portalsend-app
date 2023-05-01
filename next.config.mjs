@@ -3,7 +3,7 @@ import "./src/env.mjs";
 
 import mdx from "@next/mdx";
 import remarkGfm from "remark-gfm";
-import { env } from "~/env.mjs";
+import { env } from "./src/env.mjs";
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
