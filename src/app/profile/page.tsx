@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { LockIcon } from "~/components/icons";
+// import { LockIcon } from "~/components/icons";
 import SignInButtons from "~/components/sign-in-options";
 import { rsc } from "../../shared/server-rsc/trpc";
 // import { ResetPasswordForm } from "./reset-password-form";
@@ -38,7 +38,7 @@ const Home: NextPage = async () => {
             </div>
           </div>
 
-          <div id="password" className="flex flex-col gap-6 rounded-lg border border-border bg-background p-6">
+          {/* <div id="password" className="flex flex-col gap-6 rounded-lg border border-border bg-background p-6">
             <div className="flex flex-col gap-0.5">
               <h3 className="flex scroll-m-20 items-center gap-2 text-2xl font-semibold tracking-tight">
                 <LockIcon size={20} />
@@ -49,8 +49,8 @@ const Home: NextPage = async () => {
               </div>
             </div>
 
-            {/* <ResetPasswordForm email={user.email} /> */}
-          </div>
+            <ResetPasswordForm email={user.email} />
+          </div> */}
         </div>
       )}
     </>

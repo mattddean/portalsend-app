@@ -1,15 +1,15 @@
 import { FC, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { arrayBufferToString, encryptRsaPrivateKey, generateRsaKeyPair, serializeKey } from "~/lib/key-utils";
-
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
+import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { arrayBufferToString, encryptRsaPrivateKey, generateRsaKeyPair, serializeKey } from "~/lib/key-utils";
 import { api } from "../trpc/client/trpc-client";
 
 /**
  * Ask for the user's name and master password to finish setting up their account.
+ * Non-dismissable. Annoying, but necessary until we come up with a better sign up flow.
  * @todo possible to do this as part of our next-auth sign up page?
  */
 export const CompleteSignUpDialog: FC<{
@@ -23,7 +23,12 @@ export const CompleteSignUpDialog: FC<{
   const [lastName, setLastName] = useState("");
   const [confirmationPassword, setConfirmationPassword] = useState("");
 
+  const passwordsMatch = password === confirmationPassword;
+  const canSubmitChangePassword = !!firstName && !!lastName && !!password && passwordsMatch;
+
   const generateKeyPairAndSignUp = async (password: string) => {
+    if (!canSubmitChangePassword) throw new Error("Invalid passwords input"); // the ui should have prevented this
+
     const keyPair = await generateRsaKeyPair();
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const encryptedPrivateKey = await encryptRsaPrivateKey(keyPair, password, salt);
@@ -38,19 +43,17 @@ export const CompleteSignUpDialog: FC<{
     });
 
     await utils.example.getMyKeys.invalidate();
+
+    close();
   };
 
   return (
-    <Dialog
-      open={dialogOpen}
-      onOpenChange={(open) => {
-        if (!open) close();
-      }}
-    >
+    // we don't handle onOpenChange so that the dialog can't close itself when the user clicks outside of it
+    <Dialog open={dialogOpen} onOpenChange={() => undefined}>
       {/* Is the answer still loading? TODO: maybe skeleton, but we expect this query to always be loaded by the time this modal is opened. */}
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>Choose master password</DialogTitle>
+          <DialogTitle>Ready to send your first file?</DialogTitle>
           <DialogDescription>
             <HoverCard>
               <HoverCardTrigger className="underline-offset-3 cursor-default underline decoration-slate-500 decoration-dashed hover:decoration-slate-400">
@@ -77,7 +80,7 @@ export const CompleteSignUpDialog: FC<{
             }}
           >
             {/* TODO: tell the user that their name will appear in their recipients' emails (maybe even show picture of example email subject). */}
-            <Label htmlFor="password">First Name</Label>
+            <Label htmlFor="firstName">First Name</Label>
             <div className="flex w-full max-w-sm items-center space-x-2">
               <Input
                 id="firstName"
@@ -89,7 +92,7 @@ export const CompleteSignUpDialog: FC<{
               />
             </div>
 
-            <Label htmlFor="password">Last Name</Label>
+            <Label htmlFor="lastName">Last Name</Label>
             <div className="flex w-full max-w-sm items-center space-x-2">
               <Input
                 id="lastName"
@@ -113,10 +116,10 @@ export const CompleteSignUpDialog: FC<{
               />
             </div>
 
-            <Label htmlFor="password">Confirm Password</Label>
+            <Label htmlFor="confirmationPassword">Confirm Password</Label>
             <div className="flex w-full max-w-sm items-center space-x-2">
               <Input
-                id="password"
+                id="confirmationPassword"
                 type="password"
                 value={confirmationPassword}
                 onChange={(e) => setConfirmationPassword(e.target.value)}
@@ -125,7 +128,7 @@ export const CompleteSignUpDialog: FC<{
               />
             </div>
 
-            <Button type="submit" disabled={!password}>
+            <Button type="submit" disabled={!canSubmitChangePassword}>
               Create Account
             </Button>
           </form>

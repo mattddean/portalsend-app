@@ -269,102 +269,105 @@ const Home: FC<Props> = ({ session }) => {
             <CompleteSignUpDialog dialogOpen={masterPasswordDialogOpen} close={() => setMasterPasswordDialogOpen(false)} />
           )}
 
-          {/* Recipient email inputs */}
-          {!!(files.length > 0 && session && !fileError) && (
-            <div className="flex w-full max-w-[200px] flex-col justify-start gap-4">
-              <div className="flex flex-col gap-2" ref={recipientListAnimateRef}>
-                {Array.from(Array(numRecipientEmailInputs)).map((_unused, index) => {
-                  const id = `recipientEmail${index}`;
-                  return (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        id={id}
-                        value={recipientEmails[index] ?? ""}
-                        onChange={(e) =>
-                          setRecipientEmails((emails) => {
-                            const copy = [...emails];
-                            const newValue = e.target.value;
-                            if (newValue === "" && numRecipientEmailInputs > 1) {
-                              // Remove this input box when the user has zeroed it out, as long as this will leave
-                              // the user with at least one box left
-                              copy.splice(index, 1);
-                            } else {
-                              copy[index] = e.target.value;
-                            }
-                            return copy;
-                          })
-                        }
-                        placeholder={index === 0 ? "Recipient email" : "Add another recipient"}
-                        className="col-span-3"
-                      />
-                      {usersNotSetUpIndicies.includes(index) && (
-                        <div>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" className="w-10 rounded-full p-0">
-                                <AlertTriangleIcon className="h-4 w-4" />
-                                <span className="sr-only">Open popover</span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-80">
-                              <div className="grid gap-4">
-                                <div className="space-y-2">
-                                  <h4 className="font-medium leading-none">Recipient not found</h4>
-                                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    This recipient doesn&rsquo;t have an account or hasn&rsquo;t set up their public key. Because of
-                                    Portalsend&rsquo;s{" "}
-                                    <a className="underline" href="#todo">
-                                      zero-knowledge architecture
-                                    </a>
-                                    , it&rsquo;s impossible for us to share a file with this user until they have set up their account.
-                                  </p>
-                                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Remove this recipient to continue. We can send them an email if you&rsquo;d like to invite them to use
-                                    Portalsend.
-                                  </p>
-                                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Once they join, you&rsquo;ll be able to easily update the recipients of your file, even if you&rsquo;ve
-                                    already sent it.
-                                  </p>
+          <div className="flex w-full flex-col gap-4">
+            {/* Recipient email inputs */}
+            {!!(files.length > 0 && session && !fileError) && (
+              <div className="flex flex-col justify-start gap-4">
+                <div className="flex flex-col gap-2" ref={recipientListAnimateRef}>
+                  {Array.from(Array(numRecipientEmailInputs)).map((_unused, index) => {
+                    const id = `recipientEmail${index}`;
+                    return (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          id={id}
+                          value={recipientEmails[index] ?? ""}
+                          onChange={(e) =>
+                            setRecipientEmails((emails) => {
+                              const copy = [...emails];
+                              const newValue = e.target.value;
+                              if (newValue === "" && numRecipientEmailInputs > 1) {
+                                // Remove this input box when the user has zeroed it out, as long as this will leave
+                                // the user with at least one box left
+                                copy.splice(index, 1);
+                              } else {
+                                copy[index] = e.target.value;
+                              }
+                              return copy;
+                            })
+                          }
+                          placeholder={index === 0 ? "Recipient email" : "Add another recipient"}
+                          className="col-span-3"
+                        />
+                        {usersNotSetUpIndicies.includes(index) && (
+                          <div>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button variant="default" className="w-10 rounded-full p-0">
+                                  <AlertTriangleIcon className="h-4 w-4" />
+                                  <span className="sr-only">Open popover</span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80">
+                                <div className="grid gap-4">
+                                  <div className="space-y-2">
+                                    <h4 className="font-medium leading-none">Recipient not found</h4>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                                      This recipient doesn&rsquo;t have an account or hasn&rsquo;t set up their public key. Because of
+                                      Portalsend&rsquo;s{" "}
+                                      {/* <a className="underline" href="#todo">
+                                        zero-knowledge architecture
+                                      </a> */}
+                                      zero-knowledge architecture, it&rsquo;s impossible for us to share a file with this user until they
+                                      have set up their account.
+                                    </p>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                                      Remove this recipient to continue. We can send them an email if you&rsquo;d like to invite them to use
+                                      Portalsend.
+                                    </p>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                                      Once they join, you&rsquo;ll be able to easily update the recipients of your file, even if
+                                      you&rsquo;ve already sent it.
+                                    </p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button variant="destructive" onClick={() => removeRecipient(recipientEmails[index]!)}>
+                                      Remove
+                                    </Button>
+                                    {/* <Button variant="outline" onClick={() => removeAndInviteRecipient(recipientEmails[index]!)}>
+                                      Remove and Invite
+                                    </Button> */}
+                                  </div>
                                 </div>
-                                <div className="flex gap-2">
-                                  <Button variant="outline" onClick={() => removeRecipient(recipientEmails[index]!)}>
-                                    Remove
-                                  </Button>
-                                  <Button variant="outline" onClick={() => removeAndInviteRecipient(recipientEmails[index]!)}>
-                                    Remove and Invite
-                                  </Button>
-                                </div>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* Send button which spawns master password and upload dialog */}
+            {!!file && (
+              <div>
+                <MasterPasswordAndUploadDialog
+                  onClickSend={handleEncryptClick}
+                  submitEnabled={recipientEmails.length > 0}
+                  progressTasks={progressTasks}
+                  fileLink={linkToFile}
+                  isSendingFile={isSendingFile}
+                  onDialogOpenClick={onDialogOpenClick}
+                  dialogOpen={passwordDialogOpen}
+                  close={() => setPasswordDialogOpen(false)}
+                  userHasSetUpKeyPair={!!session?.keys?.public_key}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-      {/* Send button which spawns master password and upload dialog */}
-      {!!file && (
-        <div>
-          <MasterPasswordAndUploadDialog
-            onClickSend={handleEncryptClick}
-            submitEnabled={recipientEmails.length > 0}
-            progressTasks={progressTasks}
-            fileLink={linkToFile}
-            isSendingFile={isSendingFile}
-            onDialogOpenClick={onDialogOpenClick}
-            dialogOpen={passwordDialogOpen}
-            close={() => setPasswordDialogOpen(false)}
-            userHasSetUpKeyPair={!!session?.keys?.public_key}
-          />
-        </div>
-      )}
     </>
   );
 };

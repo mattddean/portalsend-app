@@ -4,14 +4,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { FC, useEffect, useRef, useState } from "react";
 import { CheckIcon, CopyIcon, SpinnerIcon } from "~/components/icons";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 
 const CopyFileLink: FC<{ fileLink: string }> = ({ fileLink }) => {
@@ -98,7 +91,7 @@ const MasterPasswordAndUploadDialog: FC<{
         if (!open) close();
       }}
     >
-      <Button onClick={() => void onDialogOpenClick()} variant="outline" disabled={!submitEnabled}>
+      <Button onClick={() => void onDialogOpenClick()} variant="default" disabled={!submitEnabled}>
         Send
       </Button>
       {/* Is the answer still loading? TODO: maybe skeleton, but we expect this query to always be loaded by the time this modal is opened. */}
