@@ -1,7 +1,6 @@
 "use client";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { inferRouterOutputs } from "@trpc/server";
 import { FC, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AlertTriangleIcon } from "~/components/icons";
@@ -14,7 +13,6 @@ import { arrayBufferToString, encryptAesKey, encryptFile, encryptFilename } from
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/client/trpc-client";
 import { PageTagline } from "../components/page-tagline";
-import { AppRouter } from "../server/routers/_app";
 import { FinishSignUpDialog } from "./finish-sign-up-dialog";
 import { UploadDialog } from "./upload-dialog";
 
@@ -69,11 +67,9 @@ const encryptKey = async (email: string | null | undefined, publicKey: string | 
   return { email, encrypted_shared_key: btoa(encryptedAesKey) };
 };
 
-export interface Props {
-  session: inferRouterOutputs<AppRouter>["example"]["getSession"];
-}
+const Home: FC = () => {
+  const sessionQuery = api.example.getSession.useQuery();
 
-const Home: FC<Props> = ({ session }) => {
   const [linkToFile, setLinkToFile] = useState<string>();
   const [files, setFiles] = useState<File[]>([]);
   const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
@@ -84,7 +80,7 @@ const Home: FC<Props> = ({ session }) => {
   const [progressTasks, setProgressTasks] = useState<{ text: string; hoverText: string }[]>([]);
   const [isSendingFile, setIsSendingFile] = useState(false);
 
-  const userIsSignedInButHasNotGeneratedKeyPair = !!session && !session?.keys;
+  const userIsSignedInButHasNotGeneratedKeyPair = !!sessionQuery?.data && !sessionQuery?.data?.keys;
   const [masterPasswordDialogOpen, setMasterPasswordDialogOpen] = useState(userIsSignedInButHasNotGeneratedKeyPair);
 
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -95,7 +91,7 @@ const Home: FC<Props> = ({ session }) => {
   const createSignedUploadUrlMutation = api.example.createSignedUploadUrl.useMutation();
 
   const onDialogOpenClick = async () => {
-    if (!session?.email) throw new Error("Failed to get user email");
+    if (!sessionQuery?.data?.email) throw new Error("Failed to get user email");
 
     const publicKeys = await getPublicKeysForUsersMutation.mutateAsync({ user_emails: recipientEmails });
     const usersNotSetUp = [];
@@ -137,12 +133,12 @@ const Home: FC<Props> = ({ session }) => {
       // The UI should have prevented us from getting here.
       throw new Error("Recipient emails are missing.");
     }
-    const myEmail = session?.email;
+    const myEmail = sessionQuery?.data?.email;
     if (!myEmail) {
       // The UI should have prevented us from getting here.
       throw new Error("Own email is missing");
     }
-    const myPublicKey = session.keys?.public_key;
+    const myPublicKey = sessionQuery?.data?.keys?.public_key;
     console.debug("mypublickey", myPublicKey);
     console.debug("recipientPublicKeys", recipientPublicKeys);
     if (!myPublicKey || recipientPublicKeys.length < 1) {
@@ -179,7 +175,7 @@ const Home: FC<Props> = ({ session }) => {
       }
       encryptedAesKeyPromises.push(encryptKey(key.email, key.data.public_key, newAesKey));
     }
-    const ownEncryptedSharedKey = await encryptKey(session.email, myPublicKey, newAesKey);
+    const ownEncryptedSharedKey = await encryptKey(sessionQuery?.data?.email, myPublicKey, newAesKey);
     setUsersNotSetUpIndicies(usersNotSetUp);
 
     // TODO: use Promise.allSettled and catch the error and report to the user which users don't have accounts set up.
@@ -255,10 +251,10 @@ const Home: FC<Props> = ({ session }) => {
 
         <div className="flex flex-col items-center justify-center gap-4">
           {/* Sign in buttons */}
-          {!session && <SignInButtons />}
+          {!sessionQuery?.data && <SignInButtons />}
 
           {/* File upload box */}
-          {!!session && (
+          {!!sessionQuery?.data && (
             <div className="flex justify-center">
               <Dropzone onDropFiles={setFiles} files={files} />
             </div>
@@ -272,7 +268,7 @@ const Home: FC<Props> = ({ session }) => {
 
           <div className="flex w-full flex-col gap-4">
             {/* Recipient email inputs */}
-            {!!(files.length > 0 && session && !fileError) && (
+            {!!(files.length > 0 && sessionQuery?.data && !fileError) && (
               <div className="flex flex-col justify-start gap-4">
                 <div className="flex flex-col gap-2" ref={recipientListAnimateRef}>
                   {Array.from(Array(numRecipientEmailInputs)).map((_unused, index) => {

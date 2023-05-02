@@ -75,10 +75,6 @@ export interface Props {
 
 /** @todo option to sort ascending by time and ability to search, once the user has decrypted the file names */
 export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClickDecryptFilenames, pageSizes, initialPageSize }) => {
-  // Dehydrate data that we fetched on the server in server components higher up the tree
-  const queryClient = useQueryClient();
-  dehydrate(queryClient);
-
   const columns = useMemo<ColumnDef<Row>[]>(
     () => [
       {
@@ -109,6 +105,10 @@ export const FilesTable: FC<Props> = ({ onlySentReceived, rsaPrivateKey, onClick
     pageSize,
   };
 
+  // Dehydrate data that we fetched on the server in server components higher up the tree so that our infiniteFiles query
+  // has instant access to data on page load.
+  const queryClient = useQueryClient();
+  dehydrate(queryClient);
   const dataQuery = api.example.infiniteFiles.useInfiniteQuery(
     { limit: fetchDataOptions.pageSize, only_sent_received: onlySentReceived },
     { getNextPageParam: (lastPage) => lastPage.nextCursor, refetchOnWindowFocus: false },

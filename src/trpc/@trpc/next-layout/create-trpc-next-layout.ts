@@ -56,9 +56,7 @@ function getQueryKey(path: string[], input: unknown) {
   return input === undefined ? [path] : [path, input];
 }
 
-export function createTRPCNextLayout<TRouter extends AnyRouter>(
-  opts: CreateTRPCNextLayoutOptions<TRouter>,
-): CreateTRPCNextLayout<TRouter> {
+export function createTRPCNextLayout<TRouter extends AnyRouter>(opts: CreateTRPCNextLayoutOptions<TRouter>): CreateTRPCNextLayout<TRouter> {
   function getState() {
     const requestStorage = getRequestStorage<{
       _trpc: {

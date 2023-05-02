@@ -42,8 +42,7 @@ export const FinishSignUpDialog: FC<{
       lastName,
     });
 
-    await utils.example.getMyKeys.invalidate();
-    await utils.example.getSession.invalidate();
+    await Promise.all([utils.example.getMyKeys.invalidate(), utils.example.getSession.invalidate()]);
 
     close();
   };

@@ -6,8 +6,6 @@ Dead simple end-to-end encrypted file sharing for everyone.
 
 ### Blocking Launch
 
-- Bug: cannot send a file immediately on signing up because the session does not contain the keys. Maybe just run a getMyKeys for now.
-  Unsure why invalidating getSession does not work. Probably something to do with rsc and react-query. Debug with react-query dev tools.
 - Invite Functionality (send email to destination user when user clicks "Invite")
 - Impose a 7-day file limit and also tell users about it
   - In email
