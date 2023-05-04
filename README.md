@@ -4,6 +4,17 @@ Dead simple end-to-end encrypted file sharing for everyone.
 
 ## TODO
 
+### FileDrop
+
+- "Create a FileDrop" CTA at top right
+  - Opens a modal asking for a master password for the FileDrop
+  - Once master password is provided, navigate user to their FileDrop link
+- FileDrop link
+  - Dropzone to drop a file in the middle
+  - If the user has a cookie indicating that this FileDrop is theirs, present "Manage" and "View Files" buttons
+  - Still show those buttons if the user doesn't have the cookie, but grey them out
+  - If the user hovers over them, tell them that if this FileDrop is theirs, they'll need to get their access code from a different device that's already signed in.
+
 ### Blocking Launch
 
 - Invite Functionality (send email to destination user when user clicks "Invite")

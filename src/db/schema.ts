@@ -73,6 +73,28 @@ export const users = mysqlTable(
   }),
 );
 
+export const filedrops = mysqlTable(
+  "filedrops",
+  {
+    id: varchar("id", { length: 191 }).primaryKey().notNull(),
+    slug: varchar("slug", { length: 191 }).notNull(),
+    /** RSA private key exported as JWK, encrypted with AES, then base64 encoded */
+    encrypted_private_key: text("encrypted_private_key"),
+    /** Initialization vector used to encrypt encrypted_private_key with AES, base64 encoded */
+    encrypted_private_key_iv: text("encrypted_private_key_iv"),
+    /** Salt used to encrypt encrypted_private_key with AES, base64 encoded */
+    encrypted_private_key_salt: text("encrypted_private_key_salt"),
+    /** RSA public key exported as JWK then base64 encoded */
+    public_key: text("public_key"),
+
+    created_at: timestamp("created_at").notNull().defaultNow(),
+    updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  },
+  (filedrop) => ({
+    slug__index: uniqueIndex("filedrops__slug__idx").on(filedrop.slug),
+  }),
+);
+
 export const verificationTokens = mysqlTable(
   "verification_tokens",
   {

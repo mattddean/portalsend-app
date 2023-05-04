@@ -2,16 +2,16 @@ import "./globals.css";
 
 import { Inter as FontSans, Tourney } from "next/font/google";
 import Link from "next/link";
-import Script from "next/script";
+// import Script from "next/script";
 import { PropsWithChildren } from "react";
 import { LogoIcon } from "~/components/icons";
 import { MainNav } from "~/components/main-nav/main-nav";
 import { MobileNav } from "~/components/mobile-nav";
 import { ThemeProvider } from "~/components/theme-provider";
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { rsc } from "~/shared/server-rsc/trpc";
 import { ClientProvider } from "~/trpc/client/trpc-client";
-import { AvatarDropdownMenu } from "./avatar-dropdown-menu";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -36,12 +36,6 @@ export const metadata = {
 export default async function RootLayout(props: PropsWithChildren) {
   const session = await rsc.example.getSession.fetch();
 
-  const avatarFallbackText = (() => {
-    const userName = session?.name;
-    const firstLetterOfUsername = userName?.[0];
-    return firstLetterOfUsername?.toUpperCase();
-  })();
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -63,7 +57,9 @@ export default async function RootLayout(props: PropsWithChildren) {
                   {/* Avatar */}
                   <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
                     <nav className="flex items-center space-x-2">
-                      <>{!!session && <AvatarDropdownMenu avatarFallbackText={avatarFallbackText} user={session} />}</>
+                      <Link href="/d/new">
+                        <Button variant="default">Create a Filedrop</Button>
+                      </Link>
                     </nav>
                   </div>
                 </div>
@@ -72,7 +68,7 @@ export default async function RootLayout(props: PropsWithChildren) {
               <main className="flex-1 items-center bg-transparent text-white">
                 <div className="container mt-12 flex flex-col items-center justify-center">
                   <h1 className="text-6xl font-extrabold tracking-tight sm:text-[7rem]">
-                    <span className="font-tourney font-semibold italic text-accent-foreground">Portalsend</span>
+                    <span className="font-tourney font-semibold italic text-accent-foreground">Filedrop</span>
                   </h1>
                   {props.children}
                 </div>
@@ -101,13 +97,13 @@ export default async function RootLayout(props: PropsWithChildren) {
           </ThemeProvider>
         </ClientProvider>
       </body>
-      <Script
+      {/* <Script
         async
         defer
         data-website-id="fc659f2e-2a70-462f-9e40-ddde89a878c6"
         data-domains="portalsend.app"
         src="https://umami-mattddean.vercel.app/umami.js"
-      />
+      /> */}
     </html>
   );
 }

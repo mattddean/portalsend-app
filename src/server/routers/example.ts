@@ -85,6 +85,64 @@ export const exampleRouter = router({
         .where(eq(Schema.users.email, authenticatedEmail));
     }),
 
+  createFiledrop: publicProcedure
+    .input(
+      z.object({
+        publicKey: z.string().min(1),
+        encryptedPrivateKey: z.string().min(1),
+        encryptedPrivateKeyIv: z.string().min(1),
+        encryptedPrivateKeySalt: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const id = createId();
+      const slug = createId();
+      await db.insert(Schema.filedrops).values({
+        id,
+        slug,
+        public_key: input.publicKey,
+        encrypted_private_key: input.encryptedPrivateKey,
+        encrypted_private_key_iv: input.encryptedPrivateKeyIv,
+        encrypted_private_key_salt: input.encryptedPrivateKeySalt,
+      });
+      const [filedrop] = await db
+        .select({ slug: Schema.filedrops.slug })
+        .from(Schema.filedrops)
+        .where(eq(Schema.filedrops.id, id))
+        .limit(1);
+      if (!filedrop) throw new Error("Coding bug: cannot find filedrop that we just created");
+      return { slug: filedrop.slug };
+    }),
+
+  getFiledrop: publicProcedure
+    .input(
+      z.object({
+        publicKey: z.string().min(1),
+        encryptedPrivateKey: z.string().min(1),
+        encryptedPrivateKeyIv: z.string().min(1),
+        encryptedPrivateKeySalt: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const id = createId();
+      const slug = createId();
+      await db.insert(Schema.filedrops).values({
+        id,
+        slug,
+        public_key: input.publicKey,
+        encrypted_private_key: input.encryptedPrivateKey,
+        encrypted_private_key_iv: input.encryptedPrivateKeyIv,
+        encrypted_private_key_salt: input.encryptedPrivateKeySalt,
+      });
+      const [filedrop] = await db
+        .select({ slug: Schema.filedrops.slug })
+        .from(Schema.filedrops)
+        .where(eq(Schema.filedrops.id, id))
+        .limit(1);
+      if (!filedrop) throw new Error("Coding bug: cannot find filedrop that we just created");
+      return { slug: filedrop.slug };
+    }),
+
   /** @todo Remove this and use getSession everywhere instead of this */
   getMyKeys: privateProcedure.query(async ({ ctx }) => {
     const authenticatedEmail = ctx.user.email;

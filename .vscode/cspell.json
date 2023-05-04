@@ -9,6 +9,7 @@
     "datetime",
     "dismissable",
     "encrypter",
+    "filedrops",
     "middlewares",
     "nanoids",
     "nonameopensource",
@@ -16,6 +17,7 @@
     "runtimes"
   ],
   "ignoreWords": [
+    "Filedrop",
     "authed",
     "ciphertext",
     "clsx",
