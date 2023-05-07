@@ -1,6 +1,6 @@
 import type { Adapter } from "@auth/core/adapters";
 import { createId } from "@paralleldrive/cuid2";
-import { and, eq } from "drizzle-orm/expressions";
+import { and, eq } from "drizzle-orm";
 import type { PlanetScaleDatabase } from "drizzle-orm/planetscale-serverless";
 import { accounts, sessions, users, verificationTokens } from "../../db/schema";
 
@@ -77,9 +77,7 @@ export function createDrizzleAdapter(db: PlanetScaleDatabase): Adapter {
       });
     },
     async unlinkAccount({ providerAccountId, provider }) {
-      await db
-        .delete(accounts)
-        .where(and(eq(accounts.provider_account_id, providerAccountId), eq(accounts.provider, provider)));
+      await db.delete(accounts).where(and(eq(accounts.provider_account_id, providerAccountId), eq(accounts.provider, provider)));
     },
     async createSession(data) {
       await db.insert(sessions).values({
@@ -143,11 +141,7 @@ export function createDrizzleAdapter(db: PlanetScaleDatabase): Adapter {
         identifier: verificationToken.identifier,
         token: verificationToken.token,
       });
-      const rows = await db
-        .select()
-        .from(verificationTokens)
-        .where(eq(verificationTokens.token, verificationToken.token))
-        .limit(1);
+      const rows = await db.select().from(verificationTokens).where(eq(verificationTokens.token, verificationToken.token)).limit(1);
       const row = rows[0];
       if (!row) throw new Error("Coding bug: inserted verification token not found");
       return { expires: row.expires, identifier: row.identifier, token: row.token };
@@ -158,9 +152,7 @@ export function createDrizzleAdapter(db: PlanetScaleDatabase): Adapter {
       const row = rows[0];
       if (!row) return null;
       // Then delete it.
-      await db
-        .delete(verificationTokens)
-        .where(and(eq(verificationTokens.token, token), eq(verificationTokens.identifier, identifier)));
+      await db.delete(verificationTokens).where(and(eq(verificationTokens.token, token), eq(verificationTokens.identifier, identifier)));
       // Then return it.
       return { expires: row.expires, identifier: row.identifier, token: row.token };
     },

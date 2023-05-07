@@ -5,7 +5,7 @@ import type { NextPage } from "next";
 import { FC, useReducer, useState } from "react";
 import { Grid } from "react-loading-icons";
 import { PageTagline } from "~/components/page-tagline";
-import { SignInButtons } from "~/components/sign-in-options";
+import { SignInButton } from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
@@ -276,7 +276,7 @@ const FileSlug: NextPage<Props> = ({ params }) => {
     <>
       <div className="h-4" />
 
-      {!user.data && <SignInButtons />}
+      {!user.data && <SignInButton />}
 
       {!!user.data && (
         <div className="flex w-full flex-col items-center gap-8">

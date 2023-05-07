@@ -1,9 +1,8 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { createContext } from "~/server/context";
 import { appRouter } from "~/server/routers/_app";
-import { createGetUser } from "~/shared/server-rsc/get-user";
+import { createGetFiledrop } from "~/shared/server-rsc/get-user";
 
 export const runtime = "edge";
 
@@ -23,8 +22,6 @@ const handler = (request: NextRequest) => {
     body: request.body,
   });
 
-  const asyncStorageCookies = cookies();
-
   return fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
@@ -32,7 +29,7 @@ const handler = (request: NextRequest) => {
     createContext(opts) {
       return createContext({
         type: "api",
-        getUser: createGetUser(asyncStorageCookies),
+        getUser: createGetFiledrop(request.headers, request.cookies),
         ...opts,
       });
     },

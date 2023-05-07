@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm/expressions";
+import { eq } from "drizzle-orm";
 import { db } from "~/db/drizzle-db";
 import * as Schema from "~/db/schema";
 import { privateProcedure, router } from "../trpc";

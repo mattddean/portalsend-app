@@ -48,9 +48,7 @@ export const publicProcedure = t.procedure.use((opts) => {
       user: opts.ctx.user
         ? {
             id: opts.ctx.user.id,
-            name: opts.ctx.user.name,
-            email: opts.ctx.user.email,
-            image: (opts.ctx.user as { image?: string }).image,
+            slug: opts.ctx.user.slug,
           }
         : undefined,
     },

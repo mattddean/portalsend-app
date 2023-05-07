@@ -9,8 +9,12 @@ export type { DefaultSession, Session } from "@auth/core/types";
 
 declare module "@auth/core/types" {
   interface Session extends DefaultSession {
+    // this is actually a filedrop, not a user
     user: {
+      /** The Filedrop's internal id */
       id: string;
-    } & DefaultSession["user"];
+      /** The Filedrop's URL slug */
+      slug: string;
+    };
   }
 }

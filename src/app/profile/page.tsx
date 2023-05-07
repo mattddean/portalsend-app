@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 // import { LockIcon } from "~/components/icons";
-import { SignInButtons } from "~/components/sign-in-options";
+import { SignInButton } from "~/components/sign-in-options";
 import { rsc } from "../../shared/server-rsc/trpc";
 // import { ResetPasswordForm } from "./reset-password-form";
 
@@ -19,7 +19,7 @@ const Home: NextPage = async () => {
     <>
       <div className="h-12" />
 
-      {!user && <SignInButtons />}
+      {!user && <SignInButton />}
 
       {!!user && (
         <div className="flex w-full max-w-[500px] flex-col gap-8">

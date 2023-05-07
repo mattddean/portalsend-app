@@ -14,7 +14,8 @@
     "nanoids",
     "nonameopensource",
     "paralleldrive",
-    "runtimes"
+    "runtimes",
+    "zustand"
   ],
   "ignoreWords": [
     "Filedrop",
@@ -22,6 +23,7 @@
     "ciphertext",
     "clsx",
     "cooldown",
+    "creds",
     "doesn",
     "formkit",
     "hasn",

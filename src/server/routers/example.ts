@@ -6,12 +6,12 @@ import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { createId } from "@paralleldrive/cuid2";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, inArray, lte } from "drizzle-orm/expressions";
-import { sql } from "drizzle-orm/sql";
+import { and, desc, eq, inArray, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/db/drizzle-db";
 import * as Schema from "~/db/schema";
 import { env } from "~/env.mjs";
+import { hashStringSha256 } from "~/lib/key-utils";
 import { getS3Client, portalsendFilesS3Bucket } from "~/lib/s3";
 import { privateProcedure, publicProcedure, router } from "../trpc";
 
@@ -19,38 +19,32 @@ export const exampleRouter = router({
   getSession: publicProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return null;
 
-    const authenticatedEmail = ctx.user.email;
-    if (!authenticatedEmail) {
-      throw new Error("User does not have an email address set");
-    }
-
-    const [user] = await db
+    const [filedrop] = await db
       .select({
-        encrypted_private_key: Schema.users.encrypted_private_key,
-        encrypted_private_key_iv: Schema.users.encrypted_private_key_iv,
-        encrypted_private_key_salt: Schema.users.encrypted_private_key_salt,
-        public_key: Schema.users.public_key,
+        encrypted_private_key: Schema.filedrops.encrypted_private_key,
+        encrypted_private_key_iv: Schema.filedrops.encrypted_private_key_iv,
+        encrypted_private_key_salt: Schema.filedrops.encrypted_private_key_salt,
+        public_key: Schema.filedrops.public_key,
       })
-      .from(Schema.users)
-      .where(eq(Schema.users.email, authenticatedEmail))
+      .from(Schema.filedrops)
+      .where(eq(Schema.filedrops.id, ctx.user.id))
       .limit(1);
 
     // TODO: Consider creating a new table called user_keys where all of these can be required, then link that to a user when
     // they set up their keys. That would avoid this issue where we can't represent that if public_key exists, all keys must exist.
     const keys =
-      user?.public_key && user.encrypted_private_key_salt && user.encrypted_private_key_iv && user.encrypted_private_key
+      filedrop?.public_key && filedrop.encrypted_private_key_salt && filedrop.encrypted_private_key_iv && filedrop.encrypted_private_key
         ? {
-            encrypted_private_key: user.encrypted_private_key,
-            encrypted_private_key_iv: user.encrypted_private_key_iv,
-            encrypted_private_key_salt: user.encrypted_private_key_salt,
-            public_key: user.public_key,
+            encrypted_private_key: filedrop.encrypted_private_key,
+            encrypted_private_key_iv: filedrop.encrypted_private_key_iv,
+            encrypted_private_key_salt: filedrop.encrypted_private_key_salt,
+            public_key: filedrop.public_key,
           }
         : undefined;
 
     return {
       id: ctx.user.id,
-      name: ctx.user.name,
-      email: ctx.user.email,
+      slug: ctx.user.slug,
       keys,
     };
   }),
@@ -92,55 +86,109 @@ export const exampleRouter = router({
         encryptedPrivateKey: z.string().min(1),
         encryptedPrivateKeyIv: z.string().min(1),
         encryptedPrivateKeySalt: z.string().min(1),
+        encryptedRandomString: z.string().min(1),
+        encryptedRandomStringIv: z.string().min(1),
+        preFiledropId: z.string().min(1),
       }),
     )
     .mutation(async ({ input }) => {
       const id = createId();
       const slug = createId();
-      await db.insert(Schema.filedrops).values({
-        id,
-        slug,
-        public_key: input.publicKey,
-        encrypted_private_key: input.encryptedPrivateKey,
-        encrypted_private_key_iv: input.encryptedPrivateKeyIv,
-        encrypted_private_key_salt: input.encryptedPrivateKeySalt,
+      // const randomString = createId();
+      // const encodedRandomString = new TextEncoder().encode(randomString);
+      // const serializedPublicKey = atob(input.publicKey);
+      // const publicKey = await deserializeKey(serializedPublicKey, ["encrypt"]);
+      // const encodedEncryptedRandomString = await crypto.subtle.encrypt({ name: "RSA-OAEP" }, publicKey, encodedRandomString);
+      // const encryptedRandomString = arrayBufferToString(encodedEncryptedRandomString);
+      // const hashedRandomString = await hashStringSha256(randomString); // TODO: use bcrypt or pbkdf2 instead
+
+      // TODO: use bcrypt or pbkdf2 instead
+      // const hashedEncryptedRandomString = await hashStringSha256(input.encryptedRandomString);
+
+      // TODO: Is it secure to attach whichever preFiledrop the user specifies? Would it be better to have the client
+      // send back the unencrypted version too, then re-hash that and use it to validate that the preFiledrop exists?
+      // Or maybe even generate the filedrop's slug up front and stick it in the preFiledrop?
+      const [preFiledrop] = await db
+        .select({
+          id: Schema.preFiledrops.id,
+          hashed_random_string: Schema.preFiledrops.hashed_random_string,
+        })
+        .from(Schema.preFiledrops)
+        .where(eq(Schema.preFiledrops.id, input.preFiledropId))
+        .limit(1);
+      // may have expired if we've set up a job to clean out the old ones
+      if (!preFiledrop) throw new TRPCError({ code: "NOT_FOUND", message: `preFiledrop not found` });
+
+      await db.transaction(async (tx) => {
+        await tx.insert(Schema.filedrops).values({
+          id,
+          slug,
+          public_key: input.publicKey,
+          encrypted_private_key: input.encryptedPrivateKey,
+          encrypted_private_key_iv: input.encryptedPrivateKeyIv,
+          encrypted_private_key_salt: input.encryptedPrivateKeySalt,
+          hashed_random_string: preFiledrop.hashed_random_string,
+          encrypted_random_string: input.encryptedRandomString,
+          encrypted_random_string_iv: input.encryptedRandomStringIv,
+          // hashed_random_string: hashedRandomString,
+          // hashed_encrypted_random_string: hashedEncryptedRandomString,
+          // encrypted_random_string_iv: input.encryptedRandomStringIv,
+        });
+        await tx.delete(Schema.preFiledrops).where(eq(Schema.preFiledrops.id, preFiledrop.id));
       });
+
       const [filedrop] = await db
         .select({ slug: Schema.filedrops.slug })
         .from(Schema.filedrops)
         .where(eq(Schema.filedrops.id, id))
         .limit(1);
       if (!filedrop) throw new Error("Coding bug: cannot find filedrop that we just created");
-      return { slug: filedrop.slug };
+
+      return {
+        slug: filedrop.slug,
+      };
     }),
+
+  createPreFiledrop: publicProcedure.query(async () => {
+    const id = createId();
+    const randomString = createId();
+    const hashedRandomString = await hashStringSha256(randomString);
+
+    await db.insert(Schema.preFiledrops).values({
+      id,
+      hashed_random_string: hashedRandomString,
+    });
+
+    return {
+      id,
+      randomString,
+    };
+  }),
 
   getFiledrop: publicProcedure
     .input(
       z.object({
-        publicKey: z.string().min(1),
-        encryptedPrivateKey: z.string().min(1),
-        encryptedPrivateKeyIv: z.string().min(1),
-        encryptedPrivateKeySalt: z.string().min(1),
+        slug: z.string().min(1),
       }),
     )
-    .mutation(async ({ input }) => {
-      const id = createId();
-      const slug = createId();
-      await db.insert(Schema.filedrops).values({
-        id,
-        slug,
-        public_key: input.publicKey,
-        encrypted_private_key: input.encryptedPrivateKey,
-        encrypted_private_key_iv: input.encryptedPrivateKeyIv,
-        encrypted_private_key_salt: input.encryptedPrivateKeySalt,
-      });
+    .query(async ({ input }) => {
       const [filedrop] = await db
-        .select({ slug: Schema.filedrops.slug })
+        .select({
+          slug: Schema.filedrops.slug,
+          encrypted_random_string: Schema.filedrops.encrypted_random_string,
+          encrypted_random_string_iv: Schema.filedrops.encrypted_random_string_iv,
+          encrypted_private_key_salt: Schema.filedrops.encrypted_private_key_salt,
+        })
         .from(Schema.filedrops)
-        .where(eq(Schema.filedrops.id, id))
+        .where(eq(Schema.filedrops.slug, input.slug))
         .limit(1);
-      if (!filedrop) throw new Error("Coding bug: cannot find filedrop that we just created");
-      return { slug: filedrop.slug };
+      if (!filedrop) throw new TRPCError({ code: "NOT_FOUND" });
+      return {
+        slug: filedrop.slug,
+        encryptedRandomString: filedrop.encrypted_random_string,
+        encryptedRandomStringIv: filedrop.encrypted_random_string_iv,
+        encryptedPrivateKeySalt: filedrop.encrypted_private_key_salt,
+      };
     }),
 
   /** @todo Remove this and use getSession everywhere instead of this */

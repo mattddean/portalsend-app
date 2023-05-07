@@ -1,6 +1,6 @@
 import { type FC } from "react";
 import { PageTagline } from "~/components/page-tagline";
-import { SignInButtons } from "~/components/sign-in-options";
+import { SignInButton } from "~/components/sign-in-options";
 import { rsc } from "~/shared/server-rsc/trpc";
 import { HydrateClient } from "~/trpc/client/hydrate-client";
 import { InnerPage } from "../inner-page";
@@ -31,7 +31,7 @@ const Page: FC = async () => {
       <div className="flex w-full flex-col items-center gap-8">
         <PageTagline text="Received files" />
 
-        {!session && <SignInButtons />}
+        {!session && <SignInButton />}
 
         {!!session && (
           // Provide dehydrated state to client components.

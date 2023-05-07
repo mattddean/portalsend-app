@@ -4,7 +4,7 @@ Dead simple end-to-end encrypted file sharing for everyone.
 
 ## TODO
 
-### FileDrop
+### Filedrop
 
 - "Create a FileDrop" CTA at top right
   - Opens a modal asking for a master password for the FileDrop
@@ -14,6 +14,17 @@ Dead simple end-to-end encrypted file sharing for everyone.
   - If the user has a cookie indicating that this FileDrop is theirs, present "Manage" and "View Files" buttons
   - Still show those buttons if the user doesn't have the cookie, but grey them out
   - If the user hovers over them, tell them that if this FileDrop is theirs, they'll need to get their access code from a different device that's already signed in.
+- Evaluate which base64 encodings are not necessary.
+- Is it safe for the server to at some point know the random string and the encrypted random string? Does that reveal anything about the key used to encrypt the random string?
+- Inform users that they need to remember their filedrop link or else their files will be lost forever.
+- Inform users that their files only last 7 days.
+- Hide "Get a Filedrop" when the user is on the new Filedrop page or when they are signed into a Filedrop.
+- Put "\_b64" after all db columns that are in base64
+- Suffix all input arguments with "B64" that are in base64
+
+### Filedrop
+
+- Use someone's shadcn form example
 
 ### Blocking Launch
 

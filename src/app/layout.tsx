@@ -58,7 +58,7 @@ export default async function RootLayout(props: PropsWithChildren) {
                   <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
                     <nav className="flex items-center space-x-2">
                       <Link href="/d/new">
-                        <Button variant="default">Create a Filedrop</Button>
+                        <Button variant="default">Get a Dropstash</Button>
                       </Link>
                     </nav>
                   </div>
@@ -68,7 +68,7 @@ export default async function RootLayout(props: PropsWithChildren) {
               <main className="flex-1 items-center bg-transparent text-white">
                 <div className="container mt-12 flex flex-col items-center justify-center">
                   <h1 className="text-6xl font-extrabold tracking-tight sm:text-[7rem]">
-                    <span className="font-tourney font-semibold italic text-accent-foreground">Filedrop</span>
+                    <span className="font-tourney font-semibold italic text-accent-foreground">Dropstash</span>
                   </h1>
                   {props.children}
                 </div>

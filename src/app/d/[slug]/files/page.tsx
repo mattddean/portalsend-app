@@ -1,6 +1,5 @@
-import { type FC } from "react";
+import type { FC } from "react";
 import { PageTagline } from "~/components/page-tagline";
-import { SignInButtons } from "~/components/sign-in-options";
 import { rsc } from "~/shared/server-rsc/trpc";
 import { HydrateClient } from "~/trpc/client/hydrate-client";
 import { InnerPage } from "./inner-page";
@@ -14,7 +13,7 @@ export const metadata = {
 
 /* @ts-expect-error Async Server Component */
 const Page: FC = async () => {
-  const pageSizes: [number, number, number] = [10, 25, 50];
+  const pageSizes: [10, 25, 50] = [10, 25, 50];
   const initialPageSize = pageSizes[0];
 
   // Fetch the first page of data that FilesTable will look for so that it
@@ -30,8 +29,6 @@ const Page: FC = async () => {
       <div className="h-4" />
       <div className="flex w-full flex-col items-center gap-8">
         <PageTagline text="Received files" />
-
-        {!session && <SignInButtons />}
 
         {!!session && (
           // Provide dehydrated state to client components.

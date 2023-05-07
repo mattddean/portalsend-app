@@ -1,6 +1,6 @@
 import { ConfirmSubscriptionCommand, ConfirmSubscriptionCommandInput } from "@aws-sdk/client-sns";
 import console from "console";
-import { and, eq } from "drizzle-orm/expressions";
+import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { db } from "~/db/drizzle-db";

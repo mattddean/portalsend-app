@@ -1,15 +1,30 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { FC, useState } from "react";
 import { SpinnerIcon } from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { arrayBufferToString, encryptRsaPrivateKey, generateRsaKeyPair, serializeKey } from "~/lib/key-utils";
+import {
+  arrayBufferToString,
+  deriveKey,
+  encryptRsaPrivateKey,
+  encryptString,
+  generateNewIvForAesGcm,
+  generateRsaKeyPair,
+  serializeKey,
+} from "~/lib/key-utils";
 import { api } from "~/trpc/client/trpc-client";
 
-export const NewFiledropForm = () => {
+export interface Props {
+  preFiledrop: {
+    id: string;
+    randomString: string;
+  };
+}
+
+export const NewFiledropForm: FC<Props> = ({ preFiledrop }) => {
   // const utils = api.useContext();
   const createFiledrop = api.example.createFiledrop.useMutation();
   const [password, setPassword] = useState("");
@@ -30,18 +45,28 @@ export const NewFiledropForm = () => {
       const encryptedPrivateKey = await encryptRsaPrivateKey(keyPair, password, salt);
       const saltString = arrayBufferToString(salt);
 
+      console.debug({ encryptedPrivateKey });
+
       const encryptedPrivKeyB64 = btoa(encryptedPrivateKey.ciphertextString);
       const ivB64 = btoa(encryptedPrivateKey.ivString);
       const saltB64 = btoa(saltString);
+
+      // TODO: only derive key once and both pass it to encryptRsaPrivateKey and use it here
+      const aesKey = await deriveKey(password, salt);
+      const encryptedRandomStringIv = generateNewIvForAesGcm();
+      const encryptedRandomString = await encryptString(preFiledrop.randomString, aesKey, encryptedRandomStringIv);
 
       const filedrop = await createFiledrop.mutateAsync({
         encryptedPrivateKey: encryptedPrivKeyB64,
         encryptedPrivateKeyIv: ivB64,
         publicKey: btoa(await serializeKey(keyPair.publicKey)),
-        encryptedPrivateKeySalt: saltB64,
+        encryptedPrivateKeySalt: saltB64, // TODO: rename to derivedKeySalt
+        encryptedRandomString: btoa(encryptedRandomString),
+        encryptedRandomStringIv: btoa(arrayBufferToString(encryptedRandomStringIv)),
+        preFiledropId: preFiledrop.id,
       });
 
-      localStorage.setItem(`filedrop_access-${filedrop.slug}`, `${encryptedPrivKeyB64}|${ivB64}|${saltB64}`);
+      // localStorage.setItem(`filedrop_access-${filedrop.slug}`, `${encryptedPrivKeyB64}|${ivB64}|${saltB64}`);
 
       // const result = JsCookie.set(`filedrop_access-${filedrop.slug}`, `${encryptedPrivKeyB64}|${ivB64}|${saltB64}`, {
       //   sameSite: "strict",

@@ -4,7 +4,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { FC, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AlertTriangleIcon } from "~/components/icons";
-import { SignInButtons } from "~/components/sign-in-options";
+import { SignInButton } from "~/components/sign-in-options";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
@@ -251,7 +251,7 @@ const Home: FC = () => {
 
         <div className="flex flex-col items-center justify-center gap-4">
           {/* Sign in buttons */}
-          {!sessionQuery?.data && <SignInButtons />}
+          {!sessionQuery?.data && <SignInButton />}
 
           {/* File upload box */}
           {!!sessionQuery?.data && (

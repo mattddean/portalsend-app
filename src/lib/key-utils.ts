@@ -11,14 +11,10 @@ export const arrayBufferToString = (buf: ArrayBuffer) => {
   return String.fromCharCode.apply(null, new Uint8Array(buf) as unknown as number[]);
 };
 
-const deriveKey = async (masterPassword: string, salt: Uint8Array) => {
-  const masterPasswordAsKey = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(masterPassword),
-    "PBKDF2",
-    false,
-    ["deriveKey"],
-  );
+export const deriveKey = async (masterPassword: string, salt: Uint8Array) => {
+  const masterPasswordAsKey = await crypto.subtle.importKey("raw", new TextEncoder().encode(masterPassword), "PBKDF2", false, [
+    "deriveKey",
+  ]);
 
   const derivedKey = await crypto.subtle.deriveKey(
     // TODO: how many iterations should we be using?
@@ -29,6 +25,30 @@ const deriveKey = async (masterPassword: string, salt: Uint8Array) => {
     ["encrypt", "decrypt"],
   );
   return derivedKey;
+};
+
+export const generateNewIvForAesGcm = () => {
+  // 96 bits (or 12 bytes) is recommended by the AES-GCM specification
+  // https://developer.mozilla.org/en-US/docs/Web/API/AesGcmParams#instance_properties
+  return crypto.getRandomValues(new Uint8Array(12));
+};
+
+/** Encrypt a string using AES-GCM */
+export const encryptString = async (str: string, aesKey: CryptoKey, iv: Uint8Array) => {
+  const encodedString = new TextEncoder().encode(str);
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aesKey, encodedString);
+  const encryptedString = arrayBufferToString(encrypted);
+  console.debug({ encrypted, encodedString, encryptedString, str });
+  return encryptedString;
+};
+
+/** Decrypt a string using AES-GCM */
+export const decryptString = async (encryptedStr: string, aesKey: CryptoKey, iv: Uint8Array) => {
+  const cipherTextUint8 = stringToUint8Array(encryptedStr);
+  console.debug({ cipherTextUint8, encryptedStr });
+  const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, aesKey, cipherTextUint8);
+  const decryptedString = arrayBufferToString(decrypted);
+  return decryptedString;
 };
 
 /**
@@ -50,7 +70,7 @@ export const encryptRsaPrivateKey = async (keyPair: CryptoKeyPair, masterPasswor
   // Encrypt the private key string using AES
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encodedString = new TextEncoder().encode(privateKeyString);
-  const cipherText = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, aesKey, encodedString);
+  const cipherText = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aesKey, encodedString);
 
   // Convert ArrayBuffer to string
   const ciphertextString = arrayBufferToString(cipherText);
@@ -66,12 +86,7 @@ export const encryptRsaPrivateKey = async (keyPair: CryptoKeyPair, masterPasswor
  * Take in an RSA private key produced by encryptRsaPrivateKey and return the raw version of it
  * as a CryptoKey.
  */
-export const decryptRsaPrivateKey = async (
-  encryptedPrivateKey: string,
-  masterPassword: string,
-  salt: Uint8Array,
-  ivString: string,
-) => {
+export const decryptRsaPrivateKey = async (encryptedPrivateKey: string, masterPassword: string, salt: Uint8Array, ivString: string) => {
   // Save the cipherText and the AES key
   const cipherTextUint8 = stringToUint8Array(encryptedPrivateKey);
   const iv = stringToUint8Array(ivString);
@@ -117,6 +132,21 @@ export const serializeKey = async (key: CryptoKey) => {
   return privateKeyString;
 };
 
+/** @todo use this function wherever we can */
+export const deserializeKey = async (serializedKey: string, keyUsages: KeyUsage[]) => {
+  const importedPublicKey = await crypto.subtle.importKey(
+    "jwk",
+    JSON.parse(serializedKey) as JsonWebKey,
+    {
+      name: "RSA-OAEP",
+      hash: { name: "SHA-256" },
+    },
+    true,
+    keyUsages,
+  );
+  return importedPublicKey;
+};
+
 export const encryptAesKey = async (aesKey: CryptoKey, rsaPublicKey: string) => {
   const importedPublicKey = await crypto.subtle.importKey(
     "jwk",
@@ -139,7 +169,7 @@ export const encryptAesKey = async (aesKey: CryptoKey, rsaPublicKey: string) => 
   const encodedString = new TextEncoder().encode(privateKeyString);
   const cipherText = await crypto.subtle.encrypt({ name: "RSA-OAEP" }, importedPublicKey, encodedString);
 
-  //Convert ArrayBuffer to string
+  // Convert ArrayBuffer to string
   const encryptedAesKeyString = arrayBufferToString(cipherText);
   return encryptedAesKeyString;
 };
@@ -185,3 +215,9 @@ export const decryptFilename = async (encryptedFilename: string, aesKey: CryptoK
   const decryptedFilename = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, aesKey, buffer);
   return new Uint8Array(decryptedFilename);
 };
+
+export async function hashStringSha256(str: string) {
+  const msgUint8 = new TextEncoder().encode(str); // encode as (utf-8) Uint8Array
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
+  return arrayBufferToString(hashBuffer);
+}
