@@ -1,41 +1,37 @@
-import { eq } from "drizzle-orm/expressions";
-import type { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { eq } from "drizzle-orm";
 import { db } from "~/db/drizzle-db";
+import { hashStringSha256 } from "~/lib/key-utils";
 import * as Schema from "../../db/schema";
 
-export interface User {
+export interface Filedrop {
   id: string;
-  email: string;
-  name: string | undefined;
+  slug: string;
 }
 
-export type GetUser = () => Promise<User | null>;
+export type GetUser = () => Promise<Filedrop | null>;
 
-export function createGetUser(cookies: RequestCookies | ReadonlyRequestCookies) {
+export function createGetFiledrop(headers: Headers) {
   return async () => {
-    const newCookies = cookies.getAll().reduce((cookiesObj, cookie) => {
-      cookiesObj[cookie.name] = cookie.value;
-      return cookiesObj;
-    }, {} as Record<string, string>);
+    const authHeader = headers.get("authorization");
+    const parts = authHeader?.split(":"); // TODO: can colon appear in random string
+    if (!parts) return null;
+    const [slug, randomString] = parts;
+    if (!slug || !randomString) return null;
 
-    const sessionToken = newCookies["next-auth.session-token"] ?? newCookies["__Secure-next-auth.session-token"];
-    if (!sessionToken) return null;
-
-    const rows = await db
-      .select({ user_id: Schema.users.id, user_name: Schema.users.name, user_email: Schema.users.email })
-      .from(Schema.sessions)
-      .innerJoin(Schema.users, eq(Schema.users.id, Schema.sessions.user_id))
-      .where(eq(Schema.sessions.session_token, sessionToken))
+    const [filedrop] = await db
+      .select({ id: Schema.filedrops.id, slug: Schema.filedrops.slug, hashed_random_string: Schema.filedrops.hashed_random_string })
+      .from(Schema.filedrops)
+      .where(eq(Schema.filedrops.slug, slug))
       .limit(1);
-    const session = rows[0];
-    if (!session) return null;
+    if (!filedrop) return null;
 
-    const user: User = {
-      id: session.user_id,
-      name: session.user_name ?? undefined,
-      email: session.user_email,
+    const hashedRandomString = await hashStringSha256(randomString);
+    if (filedrop.hashed_random_string !== hashedRandomString) return null;
+
+    const result: Filedrop = {
+      id: filedrop.id,
+      slug: filedrop.slug,
     };
-    return user;
+    return result;
   };
 }
